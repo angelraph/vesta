@@ -1,0 +1,68 @@
+@import "tailwindcss";
+
+:root {
+  --cream: #fbf8f1;
+  --paper: #ffffff;
+  --ink: #0e2a22;
+  --muted: #5d6f68;
+  --line: #e7e1d3;
+  --hearth: #0f4c3a;
+  --hearth-deep: #0a3328;
+  --ember: #ef8a2b;
+  --ember-soft: #fde9d4;
+  --leaf: #e3efe9;
+  --danger: #b4412a;
+}
+
+@theme inline {
+  --color-cream: var(--cream);
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-hearth: var(--hearth);
+  --color-hearth-deep: var(--hearth-deep);
+  --color-ember: var(--ember);
+  --color-ember-soft: var(--ember-soft);
+  --color-leaf: var(--leaf);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+}
+
+html,
+body {
+  background: var(--cream);
+  color: var(--ink);
+}
+
+body {
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
+}
+
+.pt-safe {
+  padding-top: max(env(safe-area-inset-top), 0.75rem);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes flicker {
+  0%, 100% { transform: scaleY(1) translateY(0); opacity: 1; }
+  50% { transform: scaleY(1.06) translateY(-1px); opacity: 0.92; }
+}
+
+.flame {
+  transform-origin: 50% 90%;
+  animation: flicker 2.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flame { animation: none; }
+}

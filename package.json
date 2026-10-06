@@ -1,0 +1,9 @@
+{
+  "name": "vesta",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter web dev",
+    "build": "pnpm --filter web build",
+    "test:contracts": "pnpm --filter contracts test"
+  }
+}

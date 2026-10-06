@@ -1,0 +1,10 @@
+node_modules
+.next
+.env
+.env.local
+*.log
+contracts/artifacts
+contracts/cache
+contracts/types
+indexer/generated
+.DS_Store
