@@ -9,6 +9,7 @@ Built for the Monad Metropolis hackathon (Consumer Products & Payments).
 | Path | What it is |
 |---|---|
 | `apps/web` | The app. Next.js, mobile-first, installable on a phone. Mera passkeys are the only account layer. |
+| `indexer` | Envio HyperIndex v3. Indexes HouseVault into a household ledger (feed, balances, rent cycles). |
 | `contracts` | `HouseVault.sol`: rent pot, splits, settling up, send home, encrypted house notes. Hardhat 3 with tests. |
 
 ## Run it

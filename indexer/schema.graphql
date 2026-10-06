@@ -1,0 +1,78 @@
+"""Someone with a Vesta account."""
+type Person {
+  id: ID! # address
+  name: String
+  sentHomeTotal: BigInt!
+  sendHomeCount: Int!
+  memberships: [Member!]! @derivedFrom(field: "person")
+}
+
+"""A shared home and its running totals."""
+type House {
+  id: ID! # houseId
+  name: String!
+  creator: String!
+  landlord: String!
+  rent: BigInt!
+  period: BigInt!
+  nextDue: BigInt!
+  cycle: Int!
+  pot: BigInt!
+  rentCollectedTotal: BigInt!
+  expensesTotal: BigInt!
+  memberCount: Int!
+  createdAt: Int!
+  members: [Member!]! @derivedFrom(field: "house")
+  expenses: [Expense!]! @derivedFrom(field: "house")
+  cycles: [RentCycle!]! @derivedFrom(field: "house")
+}
+
+"""One person's place in one house, with their balances."""
+type Member {
+  id: ID! # houseId-address
+  house: House!
+  person: Person!
+  joinedAt: Int!
+  rentPaidTotal: BigInt!
+  "Positive: the house owes them. Negative: they owe the house."
+  net: BigInt!
+  paidForOthers: BigInt!
+  shortfalls: Int!
+}
+
+"""One month of rent for a house."""
+type RentCycle {
+  id: ID! # houseId-cycle
+  house: House!
+  cycle: Int!
+  paidIn: BigInt!
+  collected: Boolean!
+  collectedAt: Int
+}
+
+type Expense {
+  id: ID! # expenseId
+  house: House!
+  payer: String!
+  amount: BigInt!
+  memo: String!
+  participants: [String!]!
+  shares: [BigInt!]!
+  timestamp: Int!
+  txHash: String!
+}
+
+"""The feed the app shows. One row per thing that happened."""
+type Activity {
+  id: ID! # txHash-logIndex
+  kind: String! @index
+  houseId: String @index
+  actor: String! @index
+  counterparty: String @index
+  amount: BigInt!
+  memo: String
+  corridor: String
+  fxRate: BigInt
+  timestamp: Int! @index
+  txHash: String!
+}
