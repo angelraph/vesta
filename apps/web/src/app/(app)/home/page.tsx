@@ -1,169 +1,274 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Check, ChevronRight, Home as HomeIcon, Plus, Send, SplitSquareHorizontal, Sparkles, Wallet } from "lucide-react";
 import { useSession } from "@/lib/hooks";
 import { daysUntil, useFx, useHome } from "@/lib/house";
-import { collectRent, formatUsd, fromUnits, payRent } from "@/lib/vault";
-import { Avatar, Button, Card, Done, Notice, useAction } from "@/components/ui";
+import { useActivity } from "@/lib/activity";
+import { collectRent, fromUnits, payRent } from "@/lib/vault";
+import { ActivityList } from "@/components/ActivityList";
+import { Avatar, Button, Card, Money, Notice, QuickAction, SectionTitle, Skeleton, SuccessMark, useAction } from "@/components/ui";
 import { Mark } from "@/components/Logo";
 
 function greeting() {
   const h = new Date().getHours();
-  return h < 12 ? "Morning" : h < 18 ? "Afternoon" : "Evening";
+  return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+}
+
+function dueText(days: number, ts: bigint) {
+  const date = new Date(Number(ts) * 1000);
+  const weekday = date.toLocaleDateString("en-GB", { weekday: "long" });
+  if (days < 0) return "Rent day has passed";
+  if (days === 0) return "Due today";
+  if (days === 1) return "Due tomorrow";
+  if (days < 7) return `Due ${weekday}`;
+  return `Due ${date.toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`;
 }
 
 export default function Home() {
   const s = useSession();
-  const { loading, view, balances, refresh } = useHome(s);
+  const { loading, view, balances, houseIds, refresh } = useHome(s);
   const fx = useFx();
+  const activity = useActivity(s?.address, houseIds, 6);
   const { busy, error, run } = useAction();
-  const [done, setDone] = useState<{ title: string; hash: string } | null>(null);
+  const [paid, setPaid] = useState<string | null>(null);
+
+  const names = useMemo(
+    () => Object.fromEntries((view?.members ?? []).map((m) => [m.address.toLowerCase(), m.name])),
+    [view],
+  );
 
   if (!s) return null;
   const me = view?.me;
   const gbp = fx?.rates.GBP;
-
-  const myShare = view ? view.sharePerMember : 0n;
-  const myOutstanding = me && myShare > me.rentPaid ? myShare - me.rentPaid : 0n;
-  const potPct = view && view.house.rent > 0n ? Math.min(100, Number((view.house.pot * 100n) / view.house.rent)) : 0;
-  const dueIn = view ? daysUntil(view.house.nextDue) : 0;
-  const canPayLandlord = view && dueIn <= 0 && view.house.pot >= view.house.rent;
+  const share = view?.sharePerMember ?? 0n;
+  const myLeft = me && share > me.rentPaid ? share - me.rentPaid : 0n;
+  const potPct = view && view.house.rent > 0n ? Math.min(100, Number((view.house.pot * 1000n) / view.house.rent) / 10) : 0;
+  const days = view ? daysUntil(view.house.nextDue) : 0;
+  const covered = view ? view.house.pot >= view.house.rent : false;
+  const canPayLandlord = view && days <= 0 && covered;
+  const short = view?.members
+    .map((m) => ({ m, left: share > m.rentPaid ? share - m.rentPaid : 0n }))
+    .filter((x) => x.left > 0n && x.m.address.toLowerCase() !== s.address.toLowerCase());
 
   async function onPayShare() {
-    if (!view || myOutstanding === 0n) return;
+    if (!view || myLeft === 0n) return;
     await run(async () => {
-      const { hash } = await payRent(s!, view.house.id, String(fromUnits(myOutstanding)));
-      setDone({ title: `Your rent share is in. ${formatUsd(myOutstanding)}`, hash });
+      await payRent(s!, view.house.id, String(fromUnits(myLeft)));
+      setPaid(`Your share is in`);
       await refresh();
+      setTimeout(() => setPaid(null), 4000);
     });
   }
 
   async function onCollect() {
     if (!view) return;
     await run(async () => {
-      const { hash } = await collectRent(s!, view.house.id);
-      setDone({ title: "Rent paid to the landlord.", hash });
+      await collectRent(s!, view.house.id);
+      setPaid("Rent paid to the landlord");
       await refresh();
+      setTimeout(() => setPaid(null), 4000);
     });
   }
 
-  return (
-    <div className="space-y-5">
-      <div className="pt-safe flex items-center justify-between pb-1">
-        <div>
-          <p className="text-sm text-muted">
-            {greeting()}
-            {me ? `, ${me.name}` : ""}
-          </p>
-          <h1 className="font-display text-[26px] font-semibold tracking-tight">{view ? view.house.name : "Your home"}</h1>
-        </div>
-        <Mark size={36} animated />
-      </div>
+  function nudge(name: string, amount: number) {
+    const text = `Hey ${name}, rent's ${dueText(days, view!.house.nextDue).toLowerCase()}. You're $${amount.toFixed(2)} short on Vesta. Pop it in when you can 🙏`;
+    if (navigator.share) navigator.share({ text }).catch(() => null);
+    else navigator.clipboard.writeText(text);
+  }
 
-      <section className="rounded-3xl bg-hearth p-5 text-cream">
-        <p className="text-sm text-cream/70">Your balance</p>
-        <p className="num mt-1 font-display text-[40px] leading-none">{balances ? formatUsd(balances.ausd) : "…"}</p>
-        {balances && gbp ? (
-          <p className="num mt-1.5 text-sm text-cream/70">
-            about £{(fromUnits(balances.ausd) * gbp).toLocaleString("en-GB", { maximumFractionDigits: 2 })}
+  return (
+    <div className="space-y-6">
+      {/* header */}
+      <header className="pt-safe flex items-center justify-between pb-1">
+        <Link href="/house" className="flex items-center gap-3">
+          <Avatar name={me?.name ?? "You"} size={42} />
+          <div>
+            <p className="text-[13px] text-ink-2">{greeting()}</p>
+            <p className="text-[17px] font-bold leading-tight">{me?.name ?? (loading ? "…" : "Welcome")}</p>
+          </div>
+        </Link>
+        <Link href="/steward" className="flex size-11 items-center justify-center rounded-full bg-surface shadow-[0_0_0_1px_rgba(15,31,26,0.06)]" aria-label="Steward">
+          <Mark size={24} animated />
+        </Link>
+      </header>
+
+      {/* balance */}
+      <section className="px-1 text-center">
+        <p className="text-[14px] font-medium text-ink-2">Your balance</p>
+        {balances ? (
+          <p className="mt-1 text-[46px] font-extrabold leading-none tracking-[-0.03em]">
+            <Money value={fromUnits(balances.ausd)} />
           </p>
-        ) : null}
-        <div className="mt-5 grid grid-cols-2 gap-2">
-          <Link href="/topup" className="rounded-2xl bg-cream/10 px-4 py-3 text-center text-sm font-semibold hover:bg-cream/15">
-            Top up
-          </Link>
-          <Link href="/send" className="rounded-2xl bg-ember px-4 py-3 text-center text-sm font-semibold text-white hover:brightness-95">
-            Send home
-          </Link>
-        </div>
+        ) : (
+          <Skeleton className="mx-auto mt-2 h-11 w-48" />
+        )}
+        <p className="num mt-2 h-5 text-[14px] text-ink-2">
+          {balances && gbp ? `≈ £${(fromUnits(balances.ausd) * gbp).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ""}
+        </p>
       </section>
 
-      {done ? <Done title={done.title} hash={done.hash} /> : null}
+      <div className="grid grid-cols-4 gap-2 px-1">
+        <QuickAction href="/topup" icon={<Plus size={22} />} label="Add money" />
+        <QuickAction href="/send" icon={<Send size={20} />} label="Send home" tone="ember" />
+        <QuickAction href="/split?add=1" icon={<SplitSquareHorizontal size={20} />} label="Split" />
+        <QuickAction href="/house" icon={<HomeIcon size={20} />} label="House" />
+      </div>
+
+      {paid ? (
+        <Card className="rise flex items-center gap-4">
+          <SuccessMark size={44} />
+          <p className="font-semibold">{paid}</p>
+        </Card>
+      ) : null}
       {error ? <Notice tone="error">{error}</Notice> : null}
 
+      {/* rent pot */}
       {loading ? (
-        <Card>
-          <p className="text-muted">Opening your house…</p>
+        <Card className="space-y-3">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-8 w-40" />
+          <Skeleton className="h-2.5 w-full" />
         </Card>
       ) : !view ? (
-        <Card className="space-y-4">
-          <div>
-            <h2 className="font-display text-xl font-semibold">Start your house</h2>
-            <p className="mt-1 text-sm text-muted">
-              Set the rent once. Everyone pays their share into one pot and the landlord gets paid on rent day.
-            </p>
-          </div>
-          <Link href="/house/new">
+        <Card className="text-center">
+          <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-hearth-tint">
+            <Mark size={30} />
+          </span>
+          <h2 className="mt-4 text-[19px] font-bold">Set up your house</h2>
+          <p className="mx-auto mt-1.5 max-w-xs text-[14px] text-ink-2">
+            Add the rent once. Everyone pays their share into one pot, and the landlord gets paid on rent day.
+          </p>
+          <Link href="/house/new" className="mt-5 block">
             <Button className="w-full">Set up a house</Button>
           </Link>
-          <p className="text-center text-sm text-muted">Got an invite? Open the link your housemate sent you.</p>
+          <p className="mt-3 text-[13px] text-ink-3">Moving into a house on Vesta? Open the invite link you were sent.</p>
         </Card>
       ) : (
-        <>
-          <Card className="space-y-4">
-            <div className="flex items-baseline justify-between">
-              <h2 className="font-display text-xl font-semibold">Rent pot</h2>
-              <span className="text-sm text-muted">
-                {dueIn > 1 ? `due in ${dueIn} days` : dueIn === 1 ? "due tomorrow" : dueIn === 0 ? "due today" : "rent day has passed"}
+        <div>
+          <SectionTitle
+            action={
+              <Link href="/house" className="flex items-center text-[13px] font-semibold text-hearth">
+                {view.house.name} <ChevronRight size={16} />
+              </Link>
+            }
+          >
+            Rent
+          </SectionTitle>
+          <Card>
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-[30px] font-extrabold leading-none tracking-tight">
+                  <Money value={fromUnits(view.house.rent)} cents={false} />
+                </p>
+                <p className="mt-1.5 text-[14px] text-ink-2">{dueText(days, view.house.nextDue)}</p>
+              </div>
+              <span className={`rounded-full px-3 py-1 text-[12.5px] font-semibold ${covered ? "bg-hearth-tint text-good" : "bg-ember-tint text-warn"}`}>
+                {covered ? "Covered" : `$${fromUnits(view.house.rent - view.house.pot).toLocaleString("en-GB", { maximumFractionDigits: 2 })} to go`}
               </span>
             </div>
-            <div>
-              <div className="num flex items-baseline justify-between">
-                <span className="font-display text-2xl">{formatUsd(view.house.pot)}</span>
-                <span className="text-sm text-muted">of {formatUsd(view.house.rent)}</span>
-              </div>
-              <div className="mt-2 h-3 overflow-hidden rounded-full bg-leaf">
-                <div className="h-full rounded-full bg-ember transition-all duration-700" style={{ width: `${potPct}%` }} />
-              </div>
+
+            <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-sunken">
+              <div className={`h-full rounded-full transition-all duration-700 ${covered ? "bg-good" : "bg-ember"}`} style={{ width: `${potPct}%` }} />
             </div>
-            <ul className="divide-y divide-line">
+
+            <ul className="mt-4 space-y-0.5">
               {view.members.map((m) => {
-                const owes = view.sharePerMember > m.rentPaid ? view.sharePerMember - m.rentPaid : 0n;
+                const left = share > m.rentPaid ? share - m.rentPaid : 0n;
+                const isMe = m.address.toLowerCase() === s.address.toLowerCase();
                 return (
-                  <li key={m.address} className="flex items-center gap-3 py-2.5">
-                    <Avatar name={m.name} />
-                    <span className="flex-1 font-medium">
-                      {m.name}
-                      {m.address.toLowerCase() === s.address.toLowerCase() ? <span className="text-muted"> (you)</span> : null}
-                    </span>
-                    <span className={`num text-sm ${owes === 0n ? "text-hearth" : "text-muted"}`}>
-                      {owes === 0n ? "Paid" : `${formatUsd(owes)} to go`}
-                    </span>
+                  <li key={m.address} className="flex items-center gap-3 py-1.5">
+                    <Avatar name={m.name} size={30} />
+                    <span className="flex-1 text-[15px] font-medium">{isMe ? "You" : m.name}</span>
+                    {left === 0n ? (
+                      <span className="flex items-center gap-1 text-[14px] font-semibold text-good">
+                        <Money value={fromUnits(share)} cents={false} /> <Check size={16} strokeWidth={3} />
+                      </span>
+                    ) : (
+                      <span className="num text-[14px] text-ink-2">
+                        <Money value={fromUnits(left)} /> short
+                      </span>
+                    )}
                   </li>
                 );
               })}
             </ul>
-            {canPayLandlord ? (
-              <Button className="w-full" busy={busy} onClick={onCollect}>
-                Pay the landlord now
-              </Button>
-            ) : myOutstanding > 0n ? (
-              <Button className="w-full" busy={busy} onClick={onPayShare}>
-                Pay my share · {formatUsd(myOutstanding)}
-              </Button>
-            ) : (
-              <Notice>You&apos;re all paid up for this month.</Notice>
-            )}
-          </Card>
 
-          {me ? (
-            <Link href="/split">
-              <Card className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted">Bills and splits</p>
-                  <p className="num mt-0.5 font-display text-xl">
-                    {me.net > 0n ? `You're owed ${formatUsd(me.net)}` : me.net < 0n ? `You owe ${formatUsd(-me.net)}` : "All square"}
-                  </p>
-                </div>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-muted">
-                  <path d="m9 18 6-6-6-6" />
-                </svg>
-              </Card>
-            </Link>
-          ) : null}
-        </>
+            <div className="mt-4">
+              {canPayLandlord ? (
+                <Button className="w-full" busy={busy} onClick={onCollect}>
+                  Pay the landlord
+                </Button>
+              ) : myLeft > 0n ? (
+                <Button className="w-full" busy={busy} onClick={onPayShare}>
+                  Pay your share · <Money value={fromUnits(myLeft)} />
+                </Button>
+              ) : (
+                <p className="rounded-2xl bg-hearth-tint px-4 py-3 text-center text-[14px] font-medium text-hearth">You&apos;re paid up this month.</p>
+              )}
+            </div>
+          </Card>
+        </div>
       )}
+
+      {/* steward nudge */}
+      {view && short && short.length > 0 && days <= 10 ? (
+        <Card className="border-l-4 border-ember">
+          <div className="flex items-center gap-2 text-[12.5px] font-bold uppercase tracking-wide text-ember">
+            <Sparkles size={14} /> Steward
+          </div>
+          <p className="mt-2 text-[16px] font-semibold leading-snug">
+            {short.length === 1
+              ? `${short[0].m.name} is $${fromUnits(short[0].left).toFixed(2)} short.`
+              : `${short.map((x) => x.m.name).join(" and ")} still need to pay in.`}{" "}
+            Rent is {dueText(days, view.house.nextDue).toLowerCase()}.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {short.slice(0, 2).map((x) => (
+              <Button key={x.m.address} size="sm" variant="secondary" onClick={() => nudge(x.m.name, fromUnits(x.left))}>
+                Message {x.m.name}
+              </Button>
+            ))}
+            <Link href="/steward">
+              <Button size="sm" variant="ghost">
+                Ask the steward
+              </Button>
+            </Link>
+          </div>
+        </Card>
+      ) : null}
+
+      {/* activity */}
+      <div>
+        <SectionTitle
+          action={
+            <Link href="/activity" className="text-[13px] font-semibold text-hearth">
+              See all
+            </Link>
+          }
+        >
+          Recent activity
+        </SectionTitle>
+        <Card pad={false} className="px-4 py-2">
+          <ActivityList items={activity.data ?? null} me={s.address} names={names} loading={activity.data === null && !activity.error} unavailable={activity.data === null && !process.env.NEXT_PUBLIC_INDEXER_URL} />
+        </Card>
+      </div>
+
+      {balances && fromUnits(balances.ausd) === 0 && !loading ? (
+        <Link href="/topup">
+          <Card className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-full bg-ember-tint text-ember">
+              <Wallet size={18} />
+            </span>
+            <div className="flex-1">
+              <p className="font-semibold">Add money to get started</p>
+              <p className="text-[13px] text-ink-2">From a friend on Vesta, or from crypto you already hold.</p>
+            </div>
+            <ChevronRight size={18} className="text-ink-3" />
+          </Card>
+        </Link>
+      ) : null}
     </div>
   );
 }

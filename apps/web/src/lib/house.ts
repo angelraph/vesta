@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import type { Unlocked } from "./account";
 import { useLive } from "./hooks";
 import { getBalances, getHouse, getMembers, getMyHouses, type House, type Member } from "./vault";
@@ -10,12 +10,13 @@ const PICK = "vesta.house";
 export type HouseView = { house: House; members: Member[]; sharePerMember: bigint; me: Member | undefined };
 
 export function useHome(s: Unlocked | null) {
-  const [picked, setPicked] = useState<string | null>(null);
-  useEffect(() => {
+  const [picked, setPicked] = useState<string | null>(() => {
     try {
-      setPicked(localStorage.getItem(PICK));
-    } catch {}
-  }, []);
+      return localStorage.getItem(PICK);
+    } catch {
+      return null;
+    }
+  });
 
   const houses = useLive(s ? () => getMyHouses(s.address) : null, [s?.address], 15_000);
   const ids = houses.data ?? [];

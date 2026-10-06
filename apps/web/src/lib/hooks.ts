@@ -12,31 +12,47 @@ export function useSession(): Unlocked | null {
   return s.status === "unlocked" ? s.session : null;
 }
 
-/** Load data, refresh on demand, and poll gently while the tab is visible. */
+const noop = () => () => {};
+/** True once running in the browser. */
+export function useMounted() {
+  return useSyncExternalStore(noop, () => true, () => false);
+}
+
+/**
+ * Load data, refresh on demand, and poll gently while the tab is visible.
+ * Results are tied to `deps`, so stale data never shows for a new key.
+ */
 export function useLive<T>(load: (() => Promise<T>) | null, deps: unknown[], pollMs = 0) {
-  const [data, setData] = useState<T | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const key = deps.map(String).join("|");
+  const [state, setState] = useState<{ key: string; data: T | null; error: string | null }>({ key, data: null, error: null });
   const loadRef = useRef(load);
-  loadRef.current = load;
+  const keyRef = useRef(key);
+
+  useEffect(() => {
+    loadRef.current = load;
+    keyRef.current = key;
+  });
 
   const refresh = useCallback(async () => {
-    if (!loadRef.current) return;
+    const fn = loadRef.current;
+    const k = keyRef.current;
+    if (!fn) return;
     try {
-      setData(await loadRef.current());
-      setError(null);
+      const data = await fn();
+      setState({ key: k, data, error: null });
     } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
+      const error = e instanceof Error ? e.message : String(e);
+      setState((prev) => ({ key: k, data: prev.key === k ? prev.data : null, error }));
     }
   }, []);
 
   useEffect(() => {
-    setData(null);
     refresh();
     if (!pollMs) return;
     const t = setInterval(() => document.visibilityState === "visible" && refresh(), pollMs);
     return () => clearInterval(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
+  }, [key, pollMs, refresh]);
 
-  return { data, error, refresh };
+  const fresh = state.key === key;
+  return { data: fresh ? state.data : null, error: fresh ? state.error : null, refresh };
 }

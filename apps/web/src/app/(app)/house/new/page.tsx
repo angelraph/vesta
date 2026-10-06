@@ -5,7 +5,7 @@ import { useState } from "react";
 import { isAddress } from "viem";
 import { useSession } from "@/lib/hooks";
 import { createHouse } from "@/lib/vault";
-import { Button, Field, Header, Notice, useAction } from "@/components/ui";
+import { Button, Field, Notice, PageTitle, TopBar, cleanAmount, useAction } from "@/components/ui";
 
 function nextFirst() {
   const d = new Date();
@@ -35,28 +35,28 @@ export default function NewHouse() {
       });
       try {
         localStorage.setItem("vesta.house", res.houseId.toString());
-        sessionStorage.setItem(`vesta.invite.${res.houseId}`, res.invite);
       } catch {}
-      router.replace("/house?created=1");
+      router.replace("/house");
     });
   }
 
   return (
     <div>
-      <Header title="Set up a house" back="/home" />
+      <TopBar back="/home" />
+      <PageTitle sub="Takes a minute. You can invite everyone straight after.">Set up your house</PageTitle>
       <div className="space-y-4">
         <Field label="House name" placeholder="12 Amhurst Road" value={name} onChange={(e) => setName(e.target.value)} maxLength={64} />
         <Field
-          label="Monthly rent for the whole house, in dollars"
+          label="Monthly rent for the whole house"
           inputMode="decimal"
-          placeholder="2400"
+          placeholder="$2,400"
           value={rent}
-          onChange={(e) => setRent(e.target.value.replace(/[^0-9.]/g, ""))}
-          hint="Everyone's share is split evenly. You can change who's in the house any time by inviting people."
+          onChange={(e) => setRent(cleanAmount(e.target.value))}
+          hint="In US dollars. Split evenly between everyone in the house."
         />
         <Field label="First rent day" type="date" value={due} onChange={(e) => setDue(e.target.value)} />
         <Field
-          label="Where rent gets paid"
+          label="Who gets paid"
           placeholder="Landlord or agent's Vesta address"
           value={landlord}
           onChange={(e) => setLandlord(e.target.value.trim())}

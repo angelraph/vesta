@@ -1,44 +1,55 @@
 @import "tailwindcss";
 
 :root {
-  --cream: #fbf8f1;
-  --paper: #ffffff;
-  --ink: #0e2a22;
-  --muted: #5d6f68;
-  --line: #e7e1d3;
+  --bg: #f6f4ef;
+  --surface: #ffffff;
+  --sunken: #efece5;
+  --ink: #0f1f1a;
+  --ink-2: #56645e;
+  --ink-3: #8a958f;
+  --line: #e6e1d7;
   --hearth: #0f4c3a;
-  --hearth-deep: #0a3328;
-  --ember: #ef8a2b;
-  --ember-soft: #fde9d4;
-  --leaf: #e3efe9;
-  --danger: #b4412a;
+  --hearth-2: #15634b;
+  --hearth-tint: #e4efe9;
+  --ember: #e97f23;
+  --ember-tint: #fcebd9;
+  --good: #1f8a5b;
+  --warn: #b86a12;
+  --bad: #c2412b;
+  --bad-tint: #fbe6e1;
 }
 
 @theme inline {
-  --color-cream: var(--cream);
-  --color-paper: var(--paper);
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
   --color-ink: var(--ink);
-  --color-muted: var(--muted);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
   --color-line: var(--line);
   --color-hearth: var(--hearth);
-  --color-hearth-deep: var(--hearth-deep);
+  --color-hearth-2: var(--hearth-2);
+  --color-hearth-tint: var(--hearth-tint);
   --color-ember: var(--ember);
-  --color-ember-soft: var(--ember-soft);
-  --color-leaf: var(--leaf);
-  --color-danger: var(--danger);
+  --color-ember-tint: var(--ember-tint);
+  --color-good: var(--good);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --color-bad-tint: var(--bad-tint);
   --font-sans: var(--font-body);
   --font-display: var(--font-display);
 }
 
 html,
 body {
-  background: var(--cream);
+  background: var(--bg);
   color: var(--ink);
 }
 
 body {
   font-family: var(--font-body), system-ui, sans-serif;
   -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
 }
 
 .pb-safe {
@@ -46,23 +57,72 @@ body {
 }
 
 .pt-safe {
-  padding-top: max(env(safe-area-inset-top), 0.75rem);
+  padding-top: max(env(safe-area-inset-top), 1rem);
 }
 
 .num {
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 @keyframes flicker {
   0%, 100% { transform: scaleY(1) translateY(0); opacity: 1; }
   50% { transform: scaleY(1.06) translateY(-1px); opacity: 0.92; }
 }
-
 .flame {
   transform-origin: 50% 90%;
   animation: flicker 2.6s ease-in-out infinite;
 }
 
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise {
+  animation: rise 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.pop {
+  animation: pop 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes draw {
+  to { stroke-dashoffset: 0; }
+}
+.draw {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: draw 0.5s 0.25s ease-out forwards;
+}
+
+@keyframes sheet {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.sheet {
+  animation: sheet 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes shimmer {
+  100% { background-position: -200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--sunken) 25%, #f7f5f0 50%, var(--sunken) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: 10px;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .flame { animation: none; }
+  .flame, .rise, .pop, .sheet, .skeleton { animation: none; }
+  .draw { animation: none; stroke-dashoffset: 0; }
 }
