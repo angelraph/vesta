@@ -27,3 +27,7 @@ pnpm dev       # local indexer + GraphQL (needs Docker and ENVIO_API_TOKEN)
 ```
 
 Get a free HyperSync token at https://envio.dev/app/api-tokens.
+
+## Hosted
+
+Deployed on Envio's hosted service as `angelraph/vesta-indexer`. Every push to `main` redeploys it. The app reads its GraphQL endpoint from `NEXT_PUBLIC_INDEXER_URL`.
