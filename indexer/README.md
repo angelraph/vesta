@@ -30,4 +30,4 @@ Get a free HyperSync token at https://envio.dev/app/api-tokens.
 
 ## Hosted
 
-Deployed on Envio's hosted service as `angelraph/vesta-indexer`. Every push to `main` redeploys it. The app reads its GraphQL endpoint from `NEXT_PUBLIC_INDEXER_URL`.
+Deployed on Envio's hosted service as `angelraph/vesta-indexer` (free Development plan). Auto-deploy on push is off, because each deployment gets a new endpoint: redeploy from the Envio dashboard, then update `NEXT_PUBLIC_INDEXER_URL` in the app. Current endpoint: https://indexer.dev.hyperindex.xyz/e32f57e/v1/graphql
