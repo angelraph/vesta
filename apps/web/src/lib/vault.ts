@@ -7,6 +7,7 @@ import {
   http,
   keccak256,
   maxUint256,
+  parseAbi,
   parseUnits,
   toBytes,
   toHex,
@@ -52,11 +53,13 @@ export type House = {
 export type Member = { address: Address; name: string; rentPaid: bigint; net: bigint };
 
 export async function getBalances(who: Address) {
-  const [ausd, mon] = await Promise.all([
+  const [ausd, mon, received] = await Promise.all([
     publicClient.readContract({ address: addresses.ausd, abi: erc20Abi, functionName: "balanceOf", args: [who] }),
     publicClient.getBalance({ address: who }),
+    publicClient.readContract({ address: addresses.settlementPayout, abi: erc20Abi, functionName: "balanceOf", args: [who] }),
   ]);
-  return { ausd, mon };
+  // Money sent home lands as the payout token (18 decimals), already converted.
+  return { ausd, mon, received: Number(formatUnits(received, 18)) };
 }
 
 export async function getMyHouses(who: Address): Promise<bigint[]> {
@@ -209,16 +212,26 @@ export async function settle(s: Unlocked, houseId: bigint, to: Address, usd: str
   return send(s, () => s.wallet.writeContract({ ...vault, functionName: "settle", args: [houseId, to, amount] }), amount);
 }
 
+const pairAbi = parseAbi(["function getAmountsOut(uint256,address[]) view returns (uint256[])"]);
+
+/** Money sent home settles through Agora's Instant Settlement pair inside the vault call. */
 export async function sendHome(s: Unlocked, to: Address, usd: string, corridor: string, fxRate: number, memo: string) {
   const amount = toUnits(usd);
   const corridorBytes = toHex(corridor.slice(0, 3).toUpperCase(), { size: 3 });
+  const [, quoted] = await publicClient.readContract({
+    address: addresses.settlementPair,
+    abi: pairAbi,
+    functionName: "getAmountsOut",
+    args: [amount, [addresses.ausd, addresses.settlementPayout]],
+  });
+  const minOut = (quoted * 995n) / 1000n;
   return send(
     s,
     () =>
       s.wallet.writeContract({
         ...vault,
         functionName: "sendHome",
-        args: [to, amount, corridorBytes, BigInt(Math.round(fxRate * 1e6)), memo],
+        args: [to, amount, minOut, corridorBytes, BigInt(Math.round(fxRate * 1e6)), memo],
       }),
     amount,
   );

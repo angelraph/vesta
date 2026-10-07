@@ -169,7 +169,7 @@ export default function Send() {
         </Card>
 
         <p className="mt-4 px-2 text-center text-[12.5px] text-ink-3">
-          Sent as US dollars ({"AUSD"}). {to.name} can hold it or swap to {c.code} locally. The rate shown is today&apos;s mid-market rate.
+          Settled instantly through Agora, so {to.name} is paid out the moment you send. The rate shown is today&apos;s mid-market rate.
         </p>
 
         <div className="mt-6 space-y-3">

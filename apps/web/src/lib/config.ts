@@ -7,7 +7,8 @@ export const addresses = {
   ausd: (process.env.NEXT_PUBLIC_AUSD ?? "0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC") as `0x${string}`,
   // Agora Instant Settlement on Monad testnet
   settlementPair: "0x1Aa8958Aa34cEC8096EF4381cb335effe977b0ae" as `0x${string}`,
-  settlementWhitelister: "0x7c10F56d6f04a51376393a1C3670e966863F6BD5" as `0x${string}`,
+  /** The local-currency side of the pair that the recipient is paid out in (CTK on testnet). */
+  settlementPayout: "0x7BEb5D9DB0d85cBEa543C04f0dE8c23c2176cd9D" as `0x${string}`,
 } as const;
 
 export const AUSD_DECIMALS = 6;

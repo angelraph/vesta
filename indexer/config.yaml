@@ -17,8 +17,8 @@ contracts:
       - event: SentHome
 chains:
   - id: 10143 # Monad testnet
-    start_block: 68599004
+    start_block: 69070143
     contracts:
       - name: HouseVault
         address:
-          - 0x1a1fa9b1608bea5cbd8cac3462a81032c8bf6006
+          - 0x1cb8182e22e7716f9dc9174f1be7591157288559

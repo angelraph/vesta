@@ -5,18 +5,23 @@ import { writeFileSync, mkdirSync } from "node:fs";
 // `cre workflow simulate --broadcast` on Monad testnet.
 const AUSD = (process.env.AUSD_ADDRESS ?? "0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC") as `0x${string}`;
 const KEEPER = (process.env.KEEPER_ADDRESS ?? "0xB9F79d863261869B234c481D1f9A7af84AeAd192") as `0x${string}`;
+// Agora Instant Settlement on Monad testnet: the AUSD/CTK pair pays out money
+// sent home, and the whitelister approves the vault to swap on it.
+const PAIR = "0x1Aa8958Aa34cEC8096EF4381cb335effe977b0ae" as const;
+const PAYOUT = "0x7BEb5D9DB0d85cBEa543C04f0dE8c23c2176cd9D" as const; // CTK, the local-currency side
+const WHITELISTER = "0x7c10F56d6f04a51376393a1C3670e966863F6BD5" as const;
 
 const { viem, networkName } = await network.create();
 const publicClient = await viem.getPublicClient();
 const [deployer] = await viem.getWalletClients();
 console.log(`Deploying HouseVault to ${networkName} from ${deployer.account.address}`);
 
-const vault = await viem.deployContract("HouseVault", [AUSD, KEEPER]);
+const vault = await viem.deployContract("HouseVault", [AUSD, KEEPER, PAIR, PAYOUT, WHITELISTER]);
 const block = await publicClient.getBlockNumber();
 console.log(`HouseVault: ${vault.address} (block ${block})`);
 
 mkdirSync("deployments", { recursive: true });
 writeFileSync(
   `deployments/${networkName}.json`,
-  JSON.stringify({ chainId: publicClient.chain.id, houseVault: vault.address, ausd: AUSD, keeper: KEEPER, startBlock: Number(block) }, null, 2),
+  JSON.stringify({ chainId: publicClient.chain.id, houseVault: vault.address, ausd: AUSD, keeper: KEEPER, settlement: PAIR, payout: PAYOUT, startBlock: Number(block) }, null, 2),
 );

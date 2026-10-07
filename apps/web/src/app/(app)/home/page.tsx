@@ -107,6 +107,11 @@ export default function Home() {
         <p className="num mt-2 h-5 text-[14px] text-ink-2">
           {balances && gbp ? `≈ £${(fromUnits(balances.ausd) * gbp).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ""}
         </p>
+        {balances && balances.received > 0 ? (
+          <p className="num mt-1 text-[14px] font-semibold text-good">
+            + ${balances.received.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} received from abroad, ready to cash out
+          </p>
+        ) : null}
       </section>
 
       <div className="grid grid-cols-4 gap-2 px-1">

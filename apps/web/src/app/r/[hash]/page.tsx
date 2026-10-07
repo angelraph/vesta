@@ -21,6 +21,7 @@ export default async function Receipt({ params }: PageProps<"/r/[hash]">) {
   const { hash } = await params;
   let sent: { from: string; to: string; amount: number; corridor: string; fx: number; memo: string; name: string } | null = null;
   let when: Date | null = null;
+  let settled = false;
 
   if (isHash(hash)) {
     try {
@@ -29,6 +30,7 @@ export default async function Receipt({ params }: PageProps<"/r/[hash]">) {
         if (log.address.toLowerCase() !== addresses.houseVault.toLowerCase()) continue;
         try {
           const ev = decodeEventLog({ abi: houseVaultAbi, data: log.data, topics: log.topics });
+          if (ev.eventName === "SettledHome") settled = true;
           if (ev.eventName === "SentHome") {
             const name = await client.readContract({ address: addresses.houseVault, abi: houseVaultAbi, functionName: "displayName", args: [ev.args.from] });
             sent = {
@@ -80,6 +82,7 @@ export default async function Receipt({ params }: PageProps<"/r/[hash]">) {
 
           <section className="mt-6 space-y-3.5 rounded-[24px] bg-surface p-5 text-[15px] shadow-[0_0_0_1px_rgba(15,31,26,0.04)]">
             <Line label="Status" value={<span className="text-good">Arrived</span>} />
+            {settled ? <Line label="Settled by" value="Agora, instantly" /> : null}
             {when ? <Line label="When" value={when.toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })} /> : null}
             {place ? <Line label="To" value={`${place.flag} ${place.name}`} /> : null}
             <Line label="Amount" value={usd(sent.amount)} />

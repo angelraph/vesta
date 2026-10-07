@@ -4,6 +4,18 @@ pragma solidity ^0.8.28;
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
+/// @notice Agora's Instant Settlement pair (stable swap) on Monad.
+interface IAgoraPair {
+    function swapExactTokensForTokens(uint256 amountIn, uint256 amountOutMin, address[] calldata path, address to, uint256 deadline)
+        external
+        returns (uint256[] memory amounts);
+}
+
+/// @notice Grants a contract the APPROVED_SWAPPER role on Agora pairs. Open on testnet.
+interface IAgoraWhitelister {
+    function setApprovedSwapper(address swapper) external;
+}
+
 /// @title HouseVault
 /// @notice Shared money for people who live together: a rent pot, bill splits,
 /// settlements between housemates and money sent home. Every balance is AUSD.
@@ -26,6 +38,10 @@ contract HouseVault {
     }
 
     IERC20 public immutable ausd;
+    /// @notice Agora Instant Settlement pair that pays out money sent home. Zero means plain AUSD transfers.
+    IAgoraPair public immutable settlement;
+    /// @notice What the recipient receives from the pair (the local-currency side).
+    address public immutable payout;
     address public owner;
     address public keeper; // rent-day automation (Chainlink CRE forwarder)
 
@@ -59,6 +75,7 @@ contract HouseVault {
     event ExpenseAdded(uint256 indexed houseId, uint256 indexed expenseId, address indexed payer, uint256 amount, string memo, address[] participants, uint256[] shares);
     event Settled(uint256 indexed houseId, address indexed from, address indexed to, uint256 amount);
     event SentHome(address indexed from, address indexed to, uint256 amount, bytes3 corridor, uint256 fxRate, string memo);
+    event SettledHome(address indexed to, address token, uint256 amountOut);
     event NotesUpdated(uint256 indexed houseId, address indexed member);
     event KeyWrapped(uint256 indexed houseId, address indexed member);
     event NameSet(address indexed member, string name);
@@ -82,8 +99,11 @@ contract HouseVault {
         _;
     }
 
-    constructor(IERC20 _ausd, address _keeper) {
+    constructor(IERC20 _ausd, address _keeper, IAgoraPair _settlement, address _payout, IAgoraWhitelister _whitelister) {
         ausd = _ausd;
+        settlement = _settlement;
+        payout = _payout;
+        if (address(_whitelister) != address(0)) _whitelister.setApprovedSwapper(address(this));
         owner = msg.sender;
         keeper = _keeper;
         emit KeeperChanged(_keeper);
@@ -239,12 +259,24 @@ contract HouseVault {
 
     // ------------------------------------------------------------ send home
 
-    /// @notice Send AUSD to anyone, anywhere. `corridor` is the destination
-    /// currency (e.g. "NGN") and `fxRate` the rate shown to the sender, 1e6 scaled.
-    function sendHome(address to, uint256 amount, bytes3 corridor, uint256 fxRate, string calldata memo) external {
+    /// @notice Send AUSD to anyone, anywhere. It settles instantly through Agora's
+    /// pair, so the recipient is paid out in the local-currency token in the same
+    /// transaction. `corridor` is the destination currency (e.g. "NGN") and
+    /// `fxRate` the rate shown to the sender, 1e6 scaled.
+    function sendHome(address to, uint256 amount, uint256 minOut, bytes3 corridor, uint256 fxRate, string calldata memo) external {
         if (amount == 0 || to == address(0)) revert BadAmount();
         if (bytes(memo).length > 80) revert TooLarge();
-        ausd.safeTransferFrom(msg.sender, to, amount);
+        if (address(settlement) == address(0)) {
+            ausd.safeTransferFrom(msg.sender, to, amount);
+        } else {
+            ausd.safeTransferFrom(msg.sender, address(this), amount);
+            ausd.forceApprove(address(settlement), amount);
+            address[] memory path = new address[](2);
+            path[0] = address(ausd);
+            path[1] = payout;
+            uint256[] memory out = settlement.swapExactTokensForTokens(amount, minOut, path, to, block.timestamp);
+            emit SettledHome(to, payout, out[1]);
+        }
         emit SentHome(msg.sender, to, amount, corridor, fxRate, memo);
     }
 

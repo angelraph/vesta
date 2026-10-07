@@ -11,6 +11,21 @@ export const houseVaultAbi = [
         "internalType": "address",
         "name": "_keeper",
         "type": "address"
+      },
+      {
+        "internalType": "contract IAgoraPair",
+        "name": "_settlement",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_payout",
+        "type": "address"
+      },
+      {
+        "internalType": "contract IAgoraWhitelister",
+        "name": "_whitelister",
+        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -459,6 +474,31 @@ export const houseVaultAbi = [
       }
     ],
     "name": "Settled",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amountOut",
+        "type": "uint256"
+      }
+    ],
+    "name": "SettledHome",
     "type": "event"
   },
   {
@@ -973,6 +1013,19 @@ export const houseVaultAbi = [
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "payout",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -1040,6 +1093,11 @@ export const houseVaultAbi = [
       {
         "internalType": "uint256",
         "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "minOut",
         "type": "uint256"
       },
       {
@@ -1159,6 +1217,19 @@ export const houseVaultAbi = [
     "name": "settle",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "settlement",
+    "outputs": [
+      {
+        "internalType": "contract IAgoraPair",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {

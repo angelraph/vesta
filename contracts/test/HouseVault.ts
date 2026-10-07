@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { network } from "hardhat";
-import { encodeAbiParameters, keccak256, parseUnits, toHex, zeroHash } from "viem";
+import { encodeAbiParameters, keccak256, parseUnits, toHex, zeroAddress, zeroHash } from "viem";
 
 const usd = (n: string) => parseUnits(n, 6);
 const SECRET = toHex("house-12-amhurst", { size: 32 });
@@ -11,7 +11,7 @@ async function setup() {
   const { viem, networkHelpers } = await network.create();
   const [deployer, amina, tobi, mara, landlord, keeper, outsider] = await viem.getWalletClients();
   const token = await viem.deployContract("TestToken");
-  const vault = await viem.deployContract("HouseVault", [token.address, keeper.account.address]);
+  const vault = await viem.deployContract("HouseVault", [token.address, keeper.account.address, zeroAddress, zeroAddress, zeroAddress]);
   for (const w of [amina, tobi, mara, outsider]) {
     await token.write.mint([w.account.address, usd("5000")]);
     await token.write.approve([vault.address, usd("5000")], { account: w.account });
@@ -100,10 +100,31 @@ describe("HouseVault", () => {
 
   it("sends money home with the corridor and rate on record", async () => {
     const { vault, token, amina, outsider } = await setup();
-    await vault.write.sendHome([outsider.account.address, usd("100"), toHex("NGN"), 1_550_000_000n, "For Mama"], {
+    await vault.write.sendHome([outsider.account.address, usd("100"), 0n, toHex("NGN"), 1_550_000_000n, "For Mama"], {
       account: amina.account,
     });
     assert.equal(await token.read.balanceOf([outsider.account.address]), usd("5100"));
+  });
+
+  it("settles money sent home instantly through the Agora pair", async () => {
+    const { viem, token, keeper, amina, outsider } = await setup();
+    const local = await viem.deployContract("TestToken");
+    const pair = await viem.deployContract("TestPair");
+    const vault = await viem.deployContract("HouseVault", [token.address, keeper.account.address, pair.address, local.address, zeroAddress]);
+    await token.write.approve([vault.address, usd("100")], { account: amina.account });
+    const before = await token.read.balanceOf([amina.account.address]);
+    await assert.rejects(
+      vault.write.sendHome([outsider.account.address, usd("100"), usd("101") * 10n ** 12n, toHex("NGN"), 1_550_000_000n, ""], {
+        account: amina.account,
+      }),
+      /slippage/,
+    );
+    await vault.write.sendHome([outsider.account.address, usd("100"), usd("100") * 10n ** 12n, toHex("NGN"), 1_550_000_000n, "For Mama"], {
+      account: amina.account,
+    });
+    assert.equal(await token.read.balanceOf([amina.account.address]), before - usd("100"));
+    assert.equal(await local.read.balanceOf([outsider.account.address]), usd("100") * 10n ** 12n);
+    assert.equal(await token.read.balanceOf([vault.address]), 0n);
   });
 
   it("only the keeper can deliver rent-day reports", async () => {
