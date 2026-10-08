@@ -1,0 +1,10 @@
+{
+  "schedule": "0 0 8 * * *",
+  "chainName": "monad-testnet",
+  "houseVault": "0x1cb8182e22e7716f9dc9174f1be7591157288559",
+  "fxUrl": "https://open.er-api.com/v6/latest/USD",
+  "currency": "GBP",
+  "warnDays": 3,
+  "maxReports": 5,
+  "gasLimit": "400000"
+}
