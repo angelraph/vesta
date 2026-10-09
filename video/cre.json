@@ -1,0 +1,56 @@
+{
+  "voice": "en-NG-EzinneNeural",
+  "rate": "+4%",
+  "scenes": [
+    {
+      "title": "Rent day runs itself",
+      "sub": "A Chainlink CRE workflow is the house's treasurer",
+      "say": "In Vesta, housemates pay their share into one rent pot. Nobody has to collect it, and nobody has to chase. A Chainlink Runtime Environment workflow runs rent day for every house.",
+      "phones": [{"who": "tobi", "from": "pay", "to": "settle"}, {"who": "amina", "from": "pay", "to": "split"}],
+      "badge": {"text": "Orchestrated by Chainlink CRE", "kind": "chain", "at": 0.5}
+    },
+    {
+      "title": "Read the chain, check the world",
+      "sub": "Monad state plus a live FX API, agreed by consensus",
+      "say": "Once a day, the workflow reads every house straight from the HouseVault contract on Monad. It fetches the live exchange rate from an outside API, and the nodes agree on the median. Then it decides: is rent due and the pot full, or is someone behind?",
+      "panel": {"type": "code", "path": "cre/rent-day/main.ts", "first": 78, "last": 101, "hl": [89, 98], "title": "cre/rent-day/main.ts"}
+    },
+    {
+      "title": "A signed report back onchain",
+      "sub": "Only the Chainlink forwarder can move the pot",
+      "say": "Each decision becomes a signed report, written back to the vault through the Chainlink forwarder. The vault only accepts reports from the forwarder, so nobody can pay out early, or flag a housemate by hand.",
+      "panel": {"type": "code", "path": "cre/rent-day/main.ts", "first": 103, "last": 120, "hl": [109, 113], "title": "cre/rent-day/main.ts"}
+    },
+    {
+      "title": "Three days out, someone is short",
+      "sub": "A real simulation, broadcast to Monad testnet",
+      "say": "Here's a real run against Monad testnet. A house is due soon, and one housemate has only paid half. The workflow reads eight houses, checks the rate, and flags the shortfall onchain.",
+      "panel": {"type": "terminal", "run": "run1", "command": "cre workflow simulate rent-day --broadcast"}
+    },
+    {
+      "title": "Flagged onchain",
+      "sub": "The house sees it before rent day, not after",
+      "say": "The proof is on chain. A RentShortfall event, sent through Chainlink's forwarder, showing exactly who is short and by how much. Vesta's feed and steward pick it up straight away.",
+      "panel": {"type": "proof", "hash": "0xdba7b20dfab5d7eef99399fcba6103cad97ff879adf6262a975b530374ffc786", "explorer": "testnet.monadexplorer.com/tx/0xdba7b20d…c786", "highlight": ["RentShortfall"]},
+      "badge": {"text": "Real Monad testnet transaction", "kind": "tx", "at": 0.55}
+    },
+    {
+      "title": "Rent day: the pot is full",
+      "sub": "Same workflow, next decision",
+      "say": "The housemate tops up. On rent day the workflow runs again, sees a full pot, and pays the landlord.",
+      "panel": {"type": "terminal", "run": "run2", "command": "cre workflow simulate rent-day --broadcast"}
+    },
+    {
+      "title": "Landlord paid, on the day",
+      "sub": "No reminders, no transfers, no chasing",
+      "say": "Rent collected, and the landlord paid in AUSD, in one transaction. That's Chainlink CRE as Vesta's orchestration layer: real data in, onchain action out, for every house, every month.",
+      "panel": {"type": "proof", "hash": "0xe23acc6217a14f040d29fcc8cbe12d2b56d5515148997baf862ade9ef6264014", "explorer": "testnet.monadexplorer.com/tx/0xe23acc62…4014", "highlight": ["RentCollected"]},
+      "badge": {"text": "Landlord paid by the workflow", "kind": "chain", "at": 0.55}
+    }
+  ],
+  "outro": {
+    "title": "Vesta",
+    "sub": "Rent day runs itself. Powered by Chainlink CRE.",
+    "say": "Vesta. Rent day runs itself."
+  }
+}

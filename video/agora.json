@@ -1,0 +1,114 @@
+{
+  "voice": "en-NG-EzinneNeural",
+  "rate": "+4%",
+  "scenes": [
+    {
+      "title": "Money home shouldn't cost a week",
+      "sub": "Cross-border AUSD for families, on Monad",
+      "say": "Millions of people in the UK send money home to Lagos, Accra and Nairobi every month. Today it costs a fee, a cut on the rate, and days of waiting. Vesta sends AUSD across borders in seconds, settled instantly through Agora.",
+      "phones": [
+        {
+          "who": "amina",
+          "from": "landing",
+          "to": "signup"
+        }
+      ]
+    },
+    {
+      "title": "Onboard with a passkey",
+      "sub": "Mera passkey in, AUSD balance ready",
+      "say": "Amina signs up with a Mera passkey. Just her face, no seed phrase. Her account opens with an AUSD balance on Monad, ready to send.",
+      "phones": [
+        {
+          "who": "amina",
+          "from": "signup",
+          "to": "house"
+        }
+      ],
+      "badge": {
+        "text": "AUSD balance on Monad",
+        "kind": "agora",
+        "at": 0.6
+      }
+    },
+    {
+      "title": "Send AUSD home",
+      "sub": "Pick Mama, enter fifty dollars, confirm with Face ID",
+      "say": "She picks Mama in Nigeria and enters fifty dollars. Vesta shows the live rate, a zero fee, and exactly what Mama gets. One confirmation with her passkey, and it's sent.",
+      "phones": [
+        {
+          "who": "amina",
+          "from": "send",
+          "to": "sent"
+        }
+      ],
+      "badge": {
+        "text": "Fee $0.00 · live rate",
+        "kind": "agora",
+        "at": 0.55
+      }
+    },
+    {
+      "title": "Settled instantly through Agora",
+      "sub": "One transaction, from AUSD to payout",
+      "say": "Here's that exact transaction on Monad testnet. The vault takes the AUSD, swaps it through Agora's Instant Settlement contract, and pays Mama out in the same transaction. No pending state, no second step.",
+      "panel": {
+        "type": "proof",
+        "hash": "0x05c3f43dbb03b51c9507cb26687a82b52bfe353ddb4c2a09fb7ce1eab9a2b2f5",
+        "explorer": "testnet.monadexplorer.com/tx/0x05c3f43d…b2f5",
+        "highlight": [
+          "Swap",
+          "SettledHome"
+        ],
+        "pick": [
+          1,
+          3,
+          4
+        ]
+      },
+      "badge": {
+        "text": "Agora Instant Settlement",
+        "kind": "agora",
+        "at": 0.5
+      }
+    },
+    {
+      "title": "Mama receives it",
+      "sub": "A receipt she can open on any phone",
+      "say": "On the other side, Mama gets a receipt she can open on any phone. Fifty dollars, the naira amount at the day's rate, settled by Agora, and a link to check it independently.",
+      "phones": [
+        {
+          "who": "amina",
+          "from": "receipt",
+          "to": "steward"
+        }
+      ],
+      "badge": {
+        "text": "Received in seconds",
+        "kind": "agora",
+        "at": 0.5
+      }
+    },
+    {
+      "title": "Built on Agora's contracts",
+      "sub": "HouseVault.sendHome routes every send through the pair",
+      "say": "Under the hood, every send home goes through Agora's pair inside HouseVault, with slippage protection. AUSD in, local currency out, settled in one block.",
+      "panel": {
+        "type": "code",
+        "path": "contracts/contracts/HouseVault.sol",
+        "first": 262,
+        "last": 281,
+        "hl": [
+          272,
+          278
+        ],
+        "title": "contracts/HouseVault.sol"
+      }
+    }
+  ],
+  "outro": {
+    "title": "Vesta",
+    "sub": "Money home in seconds. Settled by Agora.",
+    "say": "Vesta. Money home in seconds."
+  }
+}

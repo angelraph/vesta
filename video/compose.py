@@ -123,7 +123,31 @@ def mask(path):
     m.save(path)
 
 
+VOICE_CACHE = "video/voice-cache"
+
+
+def voice_key(text, voice, rate):
+    import hashlib
+
+    return hashlib.sha1(f"{voice}|{rate}|{text}".encode()).hexdigest()[:16]
+
+
 async def tts(text, voice, rate, path):
+    # Each line is generated once and reused, so rebuilds don't need the network.
+    import shutil as _sh
+
+    os.makedirs(VOICE_CACHE, exist_ok=True)
+    cached = f"{VOICE_CACHE}/{voice_key(text, voice, rate)}.mp3"
+    if os.path.exists(cached) and os.path.getsize(cached) > 2000:
+        _sh.copyfile(cached, path)
+        return
+    tmp = cached + ".part"
+    await _tts(text, voice, rate, tmp)
+    os.replace(tmp, cached)  # only a complete file ever lands in the cache
+    _sh.copyfile(cached, path)
+
+
+async def _tts(text, voice, rate, path):
     # The voice service occasionally drops a request; try again before failing.
     for attempt in range(5):
         try:

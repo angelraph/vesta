@@ -24,7 +24,12 @@
           "from": "signup",
           "to": "house"
         }
-      ]
+      ],
+      "badge": {
+        "text": "Passkey account in 9 seconds",
+        "kind": "mera",
+        "at": 0.55
+      }
     },
     {
       "title": "Set up the house",
@@ -36,7 +41,12 @@
           "from": "house",
           "to": "pay"
         }
-      ]
+      ],
+      "badge": {
+        "text": "Private invite link",
+        "kind": "tx",
+        "at": 0.55
+      }
     },
     {
       "title": "Tobi moves in",
@@ -48,7 +58,12 @@
           "from": "join",
           "to": "pay"
         }
-      ]
+      ],
+      "badge": {
+        "text": "His own passkey, no password",
+        "kind": "mera",
+        "at": 0.5
+      }
     },
     {
       "title": "Rent that fills itself",
@@ -65,7 +80,12 @@
           "from": "pay",
           "to": "split"
         }
-      ]
+      ],
+      "badge": {
+        "text": "Real Monad testnet transactions",
+        "kind": "tx",
+        "at": 0.45
+      }
     },
     {
       "title": "Splits without the chasing",
@@ -82,7 +102,12 @@
           "from": "settle",
           "to": "end"
         }
-      ]
+      ],
+      "badge": {
+        "text": "Settled up in one tap",
+        "kind": "tx",
+        "at": 0.55
+      }
     },
     {
       "title": "Money home in seconds",
@@ -94,7 +119,12 @@
           "from": "send",
           "to": "steward"
         }
-      ]
+      ],
+      "badge": {
+        "text": "Settled instantly by Agora · No fee",
+        "kind": "agora",
+        "at": 0.55
+      }
     },
     {
       "title": "A steward that keeps the books",
@@ -107,7 +137,12 @@
           "to": "wipe",
           "skip": 4
         }
-      ]
+      ],
+      "badge": {
+        "text": "Reads the Envio ledger",
+        "kind": "ai",
+        "at": 0.5
+      }
     },
     {
       "title": "Lose the phone, keep the house",
@@ -119,7 +154,12 @@
           "from": "wipe",
           "to": "end"
         }
-      ]
+      ],
+      "badge": {
+        "text": "Nothing stored on a server",
+        "kind": "mera",
+        "at": 0.6
+      }
     }
   ],
   "outro": {

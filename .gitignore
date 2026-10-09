@@ -9,3 +9,4 @@ contracts/types
 indexer/generated
 .DS_Store
 video/out
+video/voice-cache

@@ -35,6 +35,17 @@ async def main():
                 }
             },
         )
+        if os.environ.get("TWO_STEP"):
+            # Behave like phones that save the passkey but only return the PRF on a second use.
+            await page.add_init_script("""
+              const orig = navigator.credentials.create.bind(navigator.credentials);
+              navigator.credentials.create = async (o) => {
+                const c = await orig(o);
+                const ext = c.getClientExtensionResults.bind(c);
+                c.getClientExtensionResults = () => { const r = ext(); return { ...r, prf: { enabled: true } }; };
+                return c;
+              };
+            """)
         page.on("console", lambda m: print("console:", m.type, m.text[:2500]) if m.type in ("error", "warning") else None)
         await page.goto(URL)
         await page.wait_for_timeout(2500)
@@ -42,6 +53,14 @@ async def main():
         await page.get_by_label("Your name").fill("Amina")
         await page.get_by_role("button", name="Create with passkey").click()
         try:
+            for _ in range(60):
+                if "/home" in page.url:
+                    break
+                fin = page.get_by_role("button", name="Finish setting up")
+                if await fin.is_visible():
+                    print("second tap needed: tapping Finish setting up")
+                    await fin.click()
+                await page.wait_for_timeout(1000)
             await page.wait_for_url("**/home", timeout=60000)
             print("SIGNED UP, on", page.url)
             await page.wait_for_timeout(20000)
