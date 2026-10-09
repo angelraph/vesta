@@ -250,6 +250,97 @@ body {
   background: linear-gradient(to top, var(--bg) 70%, transparent);
 }
 
+
+/* ------------------------------------------------------------ app motion */
+
+/* Every screen glides in, its sections arriving one after another */
+.page-in > * {
+  animation: page-in 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.page-in > * > * {
+  animation: page-in 560ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.page-in > * > *:nth-child(1) { animation-delay: 40ms; }
+.page-in > * > *:nth-child(2) { animation-delay: 100ms; }
+.page-in > * > *:nth-child(3) { animation-delay: 160ms; }
+.page-in > * > *:nth-child(4) { animation-delay: 220ms; }
+.page-in > * > *:nth-child(5) { animation-delay: 280ms; }
+.page-in > * > *:nth-child(6) { animation-delay: 340ms; }
+.page-in > * > *:nth-child(7) { animation-delay: 400ms; }
+.page-in > * > *:nth-child(n + 8) { animation-delay: 460ms; }
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Rows cascade in */
+.cascade {
+  animation: cascade 480ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes cascade {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Quick actions pop in, one by one */
+.qa-pop {
+  animation: pop 520ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Cards lift a touch when pressed */
+.press {
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+.press:active {
+  transform: scale(0.985);
+}
+
+/* Bottom tabs: the active icon bounces and a dot slides in */
+.tab-on svg {
+  animation: tab-bounce 460ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes tab-bounce {
+  0% { transform: translateY(0) scale(1); }
+  40% { transform: translateY(-4px) scale(1.12); }
+  100% { transform: none; }
+}
+.tab-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--hearth);
+  animation: pop 400ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+/* Progress bars grow from zero */
+.grow-bar {
+  animation: grow-bar 1100ms 250ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform-origin: left center;
+}
+@keyframes grow-bar {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* The mark: roof settles, window glows */
+.mark-alive .mark-roof {
+  stroke-dasharray: 80;
+  animation: roof-draw 1100ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes roof-draw {
+  from { stroke-dashoffset: 80; }
+  to { stroke-dashoffset: 0; }
+}
+.mark-alive .mark-window {
+  animation: window-glow 3.2s ease-in-out 1s infinite;
+  transform-origin: 32px 20.5px;
+  transform-box: view-box;
+}
+@keyframes window-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .flame, .rise, .pop, .sheet, .skeleton, .float-card, .swap-in, .route-dot.go, .pulse-ring::after { animation: none; }
   .draw { animation: none; stroke-dashoffset: 0; }
@@ -257,4 +348,5 @@ body {
   .bar-fill { animation: none; width: 100%; }
   .highlight { animation: none; background-size: 100% 100%; }
   .reveal { opacity: 1; transform: none; transition: none; }
+  .page-in > *, .page-in > * > *, .cascade, .qa-pop, .tab-on svg, .tab-dot, .grow-bar, .mark-alive .mark-roof, .mark-alive .mark-window { animation: none; }
 }

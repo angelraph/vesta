@@ -6,7 +6,7 @@ import { Fingerprint } from "lucide-react";
 import { createAccount, unlock } from "@/lib/account";
 import { useAccount } from "@/lib/hooks";
 import { setName } from "@/lib/vault";
-import { Mark } from "@/components/Logo";
+import { Mark, Wordmark } from "@/components/Logo";
 import { Button, Field, Notice, useAction } from "@/components/ui";
 import { Landing } from "@/components/Landing";
 
@@ -64,8 +64,7 @@ export default function Welcome() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col px-6 pt-safe pb-safe">
       <div className="flex items-center gap-2 pt-2">
-        <Mark size={30} />
-        <span className="font-display text-[22px] font-semibold text-hearth">Vesta</span>
+        <Wordmark size={24} />
       </div>
 
       {step === "name" ? (

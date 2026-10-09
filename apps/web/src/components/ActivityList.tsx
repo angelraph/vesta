@@ -120,7 +120,7 @@ export function ActivityList({
         }
 
         return (
-          <div key={a.id}>
+          <div key={a.id} className="cascade" style={{ animationDelay: `${Math.min(i, 10) * 45}ms` }}>
             {header ? <p className="px-1 pb-1 pt-4 text-[12.5px] font-semibold uppercase tracking-wide text-ink-3 first:pt-1">{header}</p> : null}
             <Row lead={lead} title={title} sub={sub} trail={trail} href={a.kind === "sent" ? `/r/${a.txHash}` : undefined} />
           </div>

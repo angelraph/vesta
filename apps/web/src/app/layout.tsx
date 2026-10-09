@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: "The household account. Shared rent, splits and money home, opened with one passkey.",
   applicationName: "Vesta",
   appleWebApp: { capable: true, title: "Vesta", statusBarStyle: "default" },
-  icons: { icon: "/icon.svg", apple: "/icon-192.png" },
+  icons: { icon: "/icon.svg", apple: "/apple-icon.png" },
 };
 
 export const viewport: Viewport = {

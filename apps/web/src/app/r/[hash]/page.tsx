@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createPublicClient, decodeEventLog, http, isHash, hexToString } from "viem";
 import { houseVaultAbi } from "@/lib/abi/houseVault";
 import { addresses, AUSD_DECIMALS, chain, explorerTx } from "@/lib/config";
-import { Mark } from "@/components/Logo";
+import { Wordmark } from "@/components/Logo";
 
 const client = createPublicClient({ chain, transport: http(process.env.MONAD_RPC_URL) });
 
@@ -56,8 +56,7 @@ export default async function Receipt({ params }: PageProps<"/r/[hash]">) {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col px-5 pb-10 pt-8">
       <div className="flex items-center gap-2">
-        <Mark size={28} />
-        <span className="font-display text-[20px] font-semibold text-hearth">Vesta</span>
+        <Wordmark size={22} />
       </div>
 
       {sent ? (

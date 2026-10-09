@@ -52,7 +52,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="mx-auto min-h-dvh max-w-md md:max-w-xl">
-      <main className={`px-4 ${hideNav ? "pb-10" : "pb-28"}`}>{children}</main>
+      <main key={path} className={`page-in px-4 ${hideNav ? "pb-10" : "pb-28"}`}>{children}</main>
       {hideNav ? null : (
         <nav className="pb-safe fixed inset-x-0 bottom-0 z-30 border-t border-line/70 bg-bg/85 backdrop-blur-xl">
           <ul className="mx-auto grid max-w-md grid-cols-4 md:max-w-xl">
@@ -60,9 +60,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               const active = path === href || path.startsWith(`${href}/`);
               return (
                 <li key={href}>
-                  <Link href={href} className={`flex flex-col items-center gap-1 pt-2.5 text-[11.5px] font-semibold transition ${active ? "text-hearth" : "text-ink-3"}`}>
+                  <Link href={href} className={`flex flex-col items-center gap-1 pt-2.5 text-[11.5px] font-semibold transition ${active ? "tab-on text-hearth" : "text-ink-3"}`}>
                     <Icon size={23} strokeWidth={active ? 2.3 : 1.8} />
                     {label}
+                    <span className={active ? "tab-dot" : "h-1"} />
                   </Link>
                 </li>
               );

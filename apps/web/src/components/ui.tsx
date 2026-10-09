@@ -55,7 +55,7 @@ export function QuickAction({ href, onClick, icon, label, tone = "neutral" }: { 
       <span className="text-[12.5px] font-semibold text-ink">{label}</span>
     </>
   );
-  const cls = "group flex flex-col items-center gap-2";
+  const cls = "qa-pop group flex flex-col items-center gap-2";
   return href ? (
     <Link href={href} className={cls}>
       {inner}
@@ -70,7 +70,7 @@ export function QuickAction({ href, onClick, icon, label, tone = "neutral" }: { 
 // ------------------------------------------------------------------ layout
 
 export function Card({ children, className = "", pad = true }: { children: ReactNode; className?: string; pad?: boolean }) {
-  return <section className={`rounded-[24px] bg-surface ${pad ? "p-5" : ""} shadow-[0_1px_2px_rgba(15,31,26,0.04),0_0_0_1px_rgba(15,31,26,0.04)] ${className}`}>{children}</section>;
+  return <section className={`press rounded-[24px] bg-surface ${pad ? "p-5" : ""} shadow-[0_1px_2px_rgba(15,31,26,0.04),0_0_0_1px_rgba(15,31,26,0.04)] ${className}`}>{children}</section>;
 }
 
 export function SectionTitle({ children, action }: { children: ReactNode; action?: ReactNode }) {
@@ -173,6 +173,27 @@ export function Divider({ className = "" }: { className?: string }) {
 }
 
 // ------------------------------------------------------------------- money
+
+/** Counts from the last shown value to the new one, like a bank balance settling. */
+export function CountUp({ value, className = "" }: { value: number; className?: string }) {
+  const [shown, setShown] = useState(0);
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const from = shown;
+    const start = performance.now();
+    const dur = reduce ? 0 : 900;
+    let raf = 0;
+    const tick = (t: number) => {
+      const p = dur === 0 ? 1 : Math.min(1, (t - start) / dur);
+      setShown(from + (value - from) * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- animate only when the target changes
+  }, [value]);
+  return <Money value={shown} className={className} />;
+}
 
 export function Money({ value, className = "", cents = true }: { value: number; className?: string; cents?: boolean }) {
   const [whole, frac] = Math.abs(value)

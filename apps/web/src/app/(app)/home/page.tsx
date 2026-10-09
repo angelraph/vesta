@@ -9,7 +9,7 @@ import { useActivity } from "@/lib/activity";
 import { collectRent, fromUnits, payRent, usdText } from "@/lib/vault";
 import { TestMoneyButton } from "@/components/TestMoney";
 import { ActivityList } from "@/components/ActivityList";
-import { Avatar, Button, Card, Money, Notice, QuickAction, SectionTitle, Skeleton, SuccessMark, useAction } from "@/components/ui";
+import { Avatar, Button, Card, CountUp, Money, Notice, QuickAction, SectionTitle, Skeleton, SuccessMark, useAction } from "@/components/ui";
 import { Mark } from "@/components/Logo";
 
 function greeting() {
@@ -103,7 +103,7 @@ export default function Home() {
         <p className="text-[14px] font-medium text-ink-2">Your balance</p>
         {balances ? (
           <p className="mt-1 text-[46px] font-extrabold leading-none tracking-[-0.03em]">
-            <Money value={fromUnits(balances.ausd)} />
+            <CountUp value={fromUnits(balances.ausd)} />
           </p>
         ) : (
           <Skeleton className="mx-auto mt-2 h-11 w-48" />
@@ -179,7 +179,7 @@ export default function Home() {
             </div>
 
             <div className="mt-4 h-2.5 overflow-hidden rounded-full bg-sunken">
-              <div className={`h-full rounded-full transition-all duration-700 ${covered ? "bg-good" : "bg-ember"}`} style={{ width: `${potPct}%` }} />
+              <div className={`grow-bar h-full rounded-full transition-all duration-700 ${covered ? "bg-good" : "bg-ember"}`} style={{ width: `${potPct}%` }} />
             </div>
 
             <ul className="mt-4 space-y-0.5">
