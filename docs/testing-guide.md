@@ -50,7 +50,7 @@ No invite link? Open https://vesta-pi-neon.vercel.app, tap **"Get started"**, ty
 | "This invite doesn't work" | Ask for a fresh invite link. |
 | No passkey popup | Make sure you're in Safari (iPhone) or Chrome (Android), not inside WhatsApp. |
 | You already made a Vesta account | Tap **"I already use Vesta"** instead of step 3. |
-| Balance stays at $0 | Pull down to refresh. If it's still $0 after two minutes, tell whoever invited you. |
+| Balance stays at $0 | Tap **"Get $25 of test money"** on the home screen. |
 
 ## For the host (before inviting anyone)
 
