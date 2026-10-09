@@ -154,8 +154,14 @@ async function ensureAllowance(s: Unlocked, amount: bigint) {
   await confirmTx(hash);
 }
 
+export const usdText = (v: bigint) => `$${fromUnits(v).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
 async function send(s: Unlocked, write: () => Promise<Hex>, spend?: bigint) {
   touch();
+  if (spend) {
+    const have = await publicClient.readContract({ address: addresses.ausd, abi: erc20Abi, functionName: "balanceOf", args: [s.address] });
+    if (have < spend) throw new Error(`You have ${usdText(have)} and this needs ${usdText(spend)}. Add money first, or pay a smaller amount.`);
+  }
   await ensureGas(s);
   if (spend) await ensureAllowance(s, spend);
   const hash = await write();

@@ -6,7 +6,7 @@ import { Check, ChevronRight, Home as HomeIcon, Plus, Send, SplitSquareHorizonta
 import { useSession } from "@/lib/hooks";
 import { daysUntil, useFx, useHome } from "@/lib/house";
 import { useActivity } from "@/lib/activity";
-import { collectRent, confirmTx, fromUnits, payRent } from "@/lib/vault";
+import { collectRent, confirmTx, fromUnits, payRent, usdText } from "@/lib/vault";
 import { ActivityList } from "@/components/ActivityList";
 import { Avatar, Button, Card, Money, Notice, QuickAction, SectionTitle, Skeleton, SuccessMark, useAction } from "@/components/ui";
 import { Mark } from "@/components/Logo";
@@ -44,6 +44,9 @@ export default function Home() {
   const gbp = fx?.rates.GBP;
   const share = view?.sharePerMember ?? 0n;
   const myLeft = me && share > me.rentPaid ? share - me.rentPaid : 0n;
+  // Pay what you can: the pot takes part payments, so never ask for more than the balance.
+  const wallet = balances?.ausd ?? 0n;
+  const payable = myLeft > wallet ? wallet : myLeft;
   const potPct = view && view.house.rent > 0n ? Math.min(100, Number((view.house.pot * 1000n) / view.house.rent) / 10) : 0;
   const days = view ? daysUntil(view.house.nextDue) : 0;
   const covered = view ? view.house.pot >= view.house.rent : false;
@@ -68,10 +71,10 @@ export default function Home() {
   }
 
   async function onPayShare() {
-    if (!view || myLeft === 0n) return;
+    if (!view || payable === 0n) return;
     await run(async () => {
-      await payRent(s!, view.house.id, String(fromUnits(myLeft)));
-      setPaid(`Your share is in`);
+      await payRent(s!, view.house.id, String(fromUnits(payable)));
+      setPaid(payable < myLeft ? `${usdText(payable)} is in the pot` : `Your share is in`);
       await refresh();
       setTimeout(() => setPaid(null), 4000);
     });
@@ -220,10 +223,18 @@ export default function Home() {
                 <Button className="w-full" busy={busy} onClick={onCollect}>
                   Pay the landlord
                 </Button>
-              ) : myLeft > 0n ? (
+              ) : myLeft > 0n && payable === myLeft ? (
                 <Button className="w-full" busy={busy} onClick={onPayShare}>
                   Pay your share · <Money value={fromUnits(myLeft)} />
                 </Button>
+              ) : myLeft > 0n && payable > 0n ? (
+                <Button className="w-full" busy={busy} onClick={onPayShare}>
+                  Pay <Money value={fromUnits(payable)} /> of <Money value={fromUnits(myLeft)} />
+                </Button>
+              ) : myLeft > 0n ? (
+                <p className="rounded-2xl bg-ember-tint px-4 py-3 text-center text-[14px] font-medium text-warn">
+                  Your share is <Money value={fromUnits(myLeft)} />. Add money below to pay it.
+                </p>
               ) : (
                 <p className="rounded-2xl bg-hearth-tint px-4 py-3 text-center text-[14px] font-medium text-hearth">You&apos;re paid up this month.</p>
               )}

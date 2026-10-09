@@ -6,7 +6,7 @@ import { ArrowUp, Brain, Check, Copy, Share2, Sparkles, X } from "lucide-react";
 import { useSession } from "@/lib/hooks";
 import { useHome } from "@/lib/house";
 import { signStewardAuth } from "@/lib/stewardAuth";
-import { fromUnits, payRent, readMemory, writeMemory, type StewardMemory } from "@/lib/vault";
+import { fromUnits, payRent, readMemory, usdText, writeMemory, type StewardMemory } from "@/lib/vault";
 import { Button, Notice, Sheet, Spinner, TopBar } from "@/components/ui";
 import { Mark } from "@/components/Logo";
 
@@ -22,7 +22,7 @@ const starters = ["Who still owes rent this month?", "Am I square with everyone?
 export default function Steward() {
   const s = useSession();
   const router = useRouter();
-  const { view, current, refresh } = useHome(s);
+  const { view, current, balances, refresh } = useHome(s);
   const [memory, setMemory] = useState<StewardMemory | null>(null);
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [text, setText] = useState("");
@@ -93,11 +93,15 @@ export default function Steward() {
     if (!view || !me) return;
     const left = view.sharePerMember > me.rentPaid ? view.sharePerMember - me.rentPaid : 0n;
     if (left === 0n) return setError("You're already paid up this month.");
+    const wallet = balances?.ausd ?? 0n;
+    const pay = left > wallet ? wallet : left;
+    if (pay === 0n) return setError(`Your share is ${usdText(left)} but your balance is $0.00. Add money on Home first.`);
     setDoing(card.label);
     try {
-      await payRent(s!, view.house.id, String(fromUnits(left)));
+      await payRent(s!, view.house.id, String(fromUnits(pay)));
       await refresh();
-      setMsgs((m) => [...m, { role: "assistant", content: `Done. Your share is in the rent pot.` }]);
+      const note = pay < left ? `Done. ${usdText(pay)} is in the rent pot, ${usdText(left - pay)} still to go.` : `Done. Your share is in the rent pot.`;
+      setMsgs((m) => [...m, { role: "assistant", content: note }]);
     } catch (e) {
       const { friendlyError } = await import("@/lib/account");
       setError(friendlyError(e));
