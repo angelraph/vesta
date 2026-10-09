@@ -17,6 +17,7 @@ About 5 minutes. **It's not real money.** Vesta runs on Monad testnet, and every
 2. In **"Your name"**, type your first name. This is what the house sees.
 3. Tap **"Move in with a passkey"**.
 4. Your phone asks to save a passkey for Vesta. Tap **Continue** (or **Save**), then use Face ID, your fingerprint or your PIN.
+   - Some phones then show **"Passkey saved"**. Tap **"Finish setting up"** and confirm once more. That's normal.
 5. Wait a few seconds. You land on the Vesta home screen. That's your account made: no password, no email.
 6. Look at **"Your balance"**. Within about a minute it shows **$100.00**. If it still says $0, pull down to refresh.
 
@@ -48,7 +49,8 @@ No invite link? Open https://vesta-pi-neon.vercel.app, tap **"Get started"**, ty
 | What you see | What to do |
 |---|---|
 | "This invite doesn't work" | Ask for a fresh invite link. |
-| No passkey popup | Make sure you're in Safari (iPhone) or Chrome (Android), not inside WhatsApp. |
+| No passkey popup, or Vesta says "Open this in your browser" | Tap **Copy link** and open it in Safari (iPhone, iOS 18 or newer) or Chrome (Android). |
+| Stuck after the fingerprint | Close the page, open the link again in Safari or Chrome, and tap **"Finish setting up"** if it appears. |
 | You already made a Vesta account | Tap **"I already use Vesta"** instead of step 3. |
 | Running low on money | Tap **"Add $100 of test money"** on the home screen or the Add money page. You can do it again whenever you have under $500. |
 

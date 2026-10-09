@@ -1,5 +1,6 @@
 "use client";
 
+import { signUpClient, tapClient } from "./webauthn";
 import {
   createPasskeyWithPrfOutput,
   createSecp256k1SigningSession,
@@ -103,13 +104,14 @@ export async function createAccount(name: string): Promise<Unlocked> {
   const res = await createPasskeyWithPrfOutput({
     rp: { id: rpId(), name: "Vesta" },
     user: { name, displayName: name },
+    webAuthnClient: signUpClient,
   });
   return openSession(res.prfOutput, { credentialId: res.credentialId, transports: res.transports });
 }
 
 /** Sign in with whichever Vesta passkey the device offers. */
 export async function unlock(): Promise<Unlocked> {
-  const res = await getPasskeyPrfOutput({ rpId: rpId() });
+  const res = await getPasskeyPrfOutput({ rpId: rpId(), webAuthnClient: tapClient });
   return openSession(res.prfOutput, { credentialId: res.credentialId });
 }
 
@@ -120,7 +122,7 @@ export async function unlock(): Promise<Unlocked> {
 export async function confirmWithPasskey(): Promise<Unlocked> {
   if (state.status !== "unlocked") throw new Error("Locked");
   const current = state.session;
-  const res = await getPasskeyPrfOutput({ rpId: rpId(), credential: current.credential });
+  const res = await getPasskeyPrfOutput({ rpId: rpId(), credential: current.credential, webAuthnClient: tapClient });
   const root = await importRoot(res.prfOutput);
   res.prfOutput.fill(0);
   const pk = await deriveBytes(root, NS.account);
@@ -161,9 +163,9 @@ export function friendlyError(e: unknown): string {
   if (isMeraError(e)) {
     switch (e.code) {
       case "PRF_UNAVAILABLE":
-        return "This device's passkeys can't be used here yet. Try Chrome, Safari on iOS 18+, or a recent Android phone.";
+        return "This browser can't use Vesta's passkeys. Open the link in Safari on iPhone (iOS 18+) or Chrome on Android.";
       case "PASSKEY_OPERATION_FAILED":
-        return "The passkey prompt was closed. Try again when you're ready.";
+        return "The passkey prompt closed before it finished. Tap the button to try again. If it keeps closing, open the link in Safari or Chrome.";
       case "SESSION_ENDED":
         return "Your session ended. Unlock again to continue.";
       default:

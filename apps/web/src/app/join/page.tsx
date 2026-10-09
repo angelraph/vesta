@@ -7,6 +7,7 @@ import { useAccount, useMounted } from "@/lib/hooks";
 import { getHouse, getMembers, joinHouse, parseInvite, setName, type House } from "@/lib/vault";
 import { Mark } from "@/components/Logo";
 import { Avatar, Button, Field, Notice, useAction } from "@/components/ui";
+import { BrowserCheck, PasskeyFinish } from "@/components/PasskeyHelp";
 
 const subscribeHash = (cb: () => void) => {
   window.addEventListener("hashchange", cb);
@@ -99,7 +100,9 @@ export default function Join() {
           </div>
         ) : null}
 
+        <PasskeyFinish />
         <div className="mt-10 space-y-3">
+          <BrowserCheck />
           {account.status === "signedOut" ? (
             <>
               <Field label="Your name" placeholder="Tobi" value={name} maxLength={32} onChange={(e) => setNameInput(e.target.value)} />

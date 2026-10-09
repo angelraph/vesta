@@ -8,6 +8,7 @@ import { useAccount } from "@/lib/hooks";
 import { setName } from "@/lib/vault";
 import { Mark, Wordmark } from "@/components/Logo";
 import { Button, Field, Notice, useAction } from "@/components/ui";
+import { BrowserCheck, PasskeyFinish } from "@/components/PasskeyHelp";
 import { Landing } from "@/components/Landing";
 
 
@@ -71,7 +72,11 @@ export default function Welcome() {
         <div className="rise flex flex-1 flex-col justify-center pt-12">
           <h1 className="text-[30px] font-extrabold leading-tight tracking-tight">What should your housemates call you?</h1>
           <p className="mt-2 text-ink-2">This is the name people in your house see.</p>
-          <div className="mt-8">
+          <div className="mt-6">
+            <BrowserCheck />
+          </div>
+          <PasskeyFinish />
+          <div className="mt-6">
             <Field label="Your name" placeholder="Amina" autoFocus maxLength={32} value={name} onChange={(e) => setNameInput(e.target.value)} />
           </div>
           <div className="mt-auto space-y-3 pt-10">
@@ -89,6 +94,7 @@ export default function Welcome() {
         <>
           <Landing />
           <div className="cta-dock sticky bottom-0 -mx-6 space-y-3 px-6 pb-2 pt-8">
+            <BrowserCheck />
             {error ? <Notice tone="error">{error}</Notice> : null}
             <Button
               className="w-full"
