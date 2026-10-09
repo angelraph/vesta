@@ -2,18 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Fingerprint, Home, Send, SplitSquareHorizontal } from "lucide-react";
+import { Fingerprint } from "lucide-react";
 import { createAccount, unlock } from "@/lib/account";
 import { useAccount } from "@/lib/hooks";
 import { setName } from "@/lib/vault";
 import { Mark } from "@/components/Logo";
 import { Button, Field, Notice, useAction } from "@/components/ui";
+import { Landing } from "@/components/Landing";
 
-const points = [
-  { Icon: Home, title: "Rent that fills itself", sub: "Everyone pays into one pot. The landlord gets paid on the day." },
-  { Icon: SplitSquareHorizontal, title: "Splits without the chasing", sub: "Add the dinner, everyone settles with a tap." },
-  { Icon: Send, title: "Money home in seconds", sub: "To Lagos, Accra or Nairobi. No fee." },
-];
+
 
 export default function Welcome() {
   const account = useAccount();
@@ -72,7 +69,7 @@ export default function Welcome() {
       </div>
 
       {step === "name" ? (
-        <div className="rise flex flex-1 flex-col justify-center">
+        <div className="rise flex flex-1 flex-col justify-center pt-12">
           <h1 className="text-[30px] font-extrabold leading-tight tracking-tight">What should your housemates call you?</h1>
           <p className="mt-2 text-ink-2">This is the name people in your house see.</p>
           <div className="mt-8">
@@ -91,27 +88,16 @@ export default function Welcome() {
         </div>
       ) : (
         <>
-          <div className="flex flex-1 flex-col justify-center py-10">
-            <h1 className="font-display text-[44px] font-semibold leading-[1.02] tracking-tight">
-              Money for the people you live with.
-            </h1>
-            <ul className="mt-9 space-y-5">
-              {points.map(({ Icon, title, sub }) => (
-                <li key={title} className="flex items-start gap-4">
-                  <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-surface text-hearth shadow-[0_0_0_1px_rgba(15,31,26,0.06)]">
-                    <Icon size={20} />
-                  </span>
-                  <div>
-                    <p className="font-bold">{title}</p>
-                    <p className="text-[14px] text-ink-2">{sub}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="space-y-3">
+          <Landing />
+          <div className="cta-dock sticky bottom-0 -mx-6 space-y-3 px-6 pb-2 pt-8">
             {error ? <Notice tone="error">{error}</Notice> : null}
-            <Button className="w-full" onClick={() => setStep("name")}>
+            <Button
+              className="w-full"
+              onClick={() => {
+                window.scrollTo({ top: 0 });
+                setStep("name");
+              }}
+            >
               Get started
             </Button>
             <Button variant="secondary" className="w-full" busy={busy} onClick={onUnlock}>
