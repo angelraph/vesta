@@ -27,7 +27,7 @@ That's three apps, a spreadsheet in her head and a lot of awkward conversations.
 | "I'll pay you back for dinner" and then nobody does | Add the cost once, everyone **settles with one tap**. |
 | Money home costs a fee and takes days | Money home arrives **in seconds with no fee**, settled instantly through Agora. |
 | Passwords, seed phrases, wallet apps | **One passkey.** Your phone is the account. Lose it, and your passkey brings everything back. |
-| Nobody keeps the books | A **steward** (powered by Kimi) answers "who still owes rent?" and hands you a button to fix it. |
+| Nobody keeps the books | A **steward** (an AI agent) answers "who still owes rent?" and hands you a button to fix it. |
 
 ## How it fits together
 
@@ -51,7 +51,7 @@ flowchart LR
 
     Vault -->|"every event"| Envio["Envio indexer<br/>household ledger"]
     Envio --> Feed["Activity feed"]
-    Envio --> Steward["🤖 Steward<br/>(Kimi)"]
+    Envio --> Steward["🤖 Steward<br/>(AI agent)"]
     Steward -->|"answers + buttons"| App
 ```
 
@@ -60,7 +60,7 @@ flowchart LR
 3. **Money home** goes through Agora's Instant Settlement pair inside the same transaction, so the recipient is paid out immediately.
 4. **Rent day runs itself.** A Chainlink CRE workflow checks every house daily with a live exchange rate and either pays the landlord or flags who's short.
 5. **Envio indexes everything** into a household ledger that powers the feed and gives the steward its memory of what happened.
-6. **The steward** reads the house and the ledger through Kimi tool calls, answers in plain words and suggests actions. It can never move money itself. Your passkey always has the last word.
+6. **The steward** reads the house and the ledger through AI tool calls (OpenAI), answers in plain words and suggests actions. It can never move money itself. Your passkey always has the last word.
 
 ## Who it's for first
 
@@ -85,7 +85,7 @@ Diaspora housemates in the UK who share rent and send money home to Nigeria, Gha
 | **Agora** | AUSD balances and instant settlement for money sent home. |
 | **Chainlink CRE** | The rent-day workflow that pays the landlord or flags shortfalls. |
 | **Envio** | The household ledger behind the activity feed and the steward. |
-| **Kimi** | The steward: tool calling over the house, the ledger and live FX rates. |
+| **OpenAI** | The steward: tool calling over the house, the ledger and live FX rates. |
 
 ## Run it
 

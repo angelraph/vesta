@@ -4,16 +4,16 @@ import { houseVaultAbi } from "./abi/houseVault";
 import { addresses, AUSD_DECIMALS } from "./config";
 import { serverPublic } from "./server";
 
-// The steward is a Kimi agent with read-only tools over the house. It can
+// The steward is an OpenAI agent with read-only tools over the house. It can
 // suggest an action, but only the person can carry it out, with their passkey.
 
-const KIMI_URL = "https://api.moonshot.ai/v1/chat/completions";
-const MODEL = process.env.KIMI_MODEL ?? "kimi-k3";
+const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+const MODEL = process.env.OPENAI_MODEL ?? "gpt-5-mini";
 const INDEXER = process.env.NEXT_PUBLIC_INDEXER_URL;
 
 export type ChatMessage =
   | { role: "system" | "user"; content: string }
-  | { role: "assistant"; content: string | null; reasoning_content?: string; tool_calls?: ToolCall[] }
+  | { role: "assistant"; content: string | null; tool_calls?: ToolCall[] }
   | { role: "tool"; tool_call_id: string; content: string };
 
 type ToolCall = { id: string; type: "function"; function: { name: string; arguments: string } };
@@ -183,25 +183,25 @@ ${memory.length ? memory.map((m) => `- ${m}`).join("\n") : "- Nothing yet."}`;
 }
 
 export async function runSteward(input: { me: Address; name: string; houseId: bigint | null; memory: string[]; messages: ChatMessage[] }) {
-  const key = process.env.KIMI_API_KEY;
+  const key = process.env.OPENAI_API_KEY;
   if (!key) throw new StewardOff();
   const cards: StewardCard[] = [];
   const msgs: ChatMessage[] = [{ role: "system", content: system(input.name, input.memory.slice(0, 30)) }, ...input.messages.slice(-12)];
 
   for (let round = 0; round < 6; round++) {
-    const body: Record<string, unknown> = { model: MODEL, messages: msgs, tools, max_tokens: 900 };
-    if (MODEL.startsWith("kimi-k3")) body.reasoning_effort = "low";
-    else body.thinking = { type: "disabled" };
-    const res = await fetch(KIMI_URL, {
+    const body: Record<string, unknown> = { model: MODEL, messages: msgs, tools, max_completion_tokens: 2000 };
+    // Reasoning models think before answering; keep it light so replies stay quick.
+    if (/^(gpt-5|o\d)/.test(MODEL)) body.reasoning_effort = "low";
+    const res = await fetch(OPENAI_URL, {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
       body: JSON.stringify(body),
     });
-    if (!res.ok) throw new Error(`Kimi ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    if (!res.ok) throw new Error(`OpenAI ${res.status}: ${(await res.text()).slice(0, 200)}`);
     const data = (await res.json()) as { choices: { message: ChatMessage & { role: "assistant" }; finish_reason: string }[] };
     const choice = data.choices[0];
-    // Keep the whole assistant message, reasoning included, so tool rounds stay coherent.
-    msgs.push(choice.message);
+    // Send back only what the API accepts as input, so tool rounds stay valid.
+    msgs.push({ role: "assistant", content: choice.message.content ?? null, ...(choice.message.tool_calls?.length ? { tool_calls: choice.message.tool_calls } : {}) });
     const calls = choice.message.tool_calls ?? [];
     if (choice.finish_reason !== "tool_calls" || calls.length === 0) {
       return { reply: (choice.message.content ?? "").trim(), cards };
