@@ -65,6 +65,11 @@ export default function NewHouse() {
           autoCorrect="off"
           spellCheck={false}
         />
+        {s && landlord.toLowerCase() !== s.address.toLowerCase() ? (
+          <button type="button" onClick={() => setLandlord(s.address)} className="-mt-2 text-[13px] font-semibold text-hearth">
+            I collect the rent myself (use my address)
+          </button>
+        ) : null}
         {error ? <Notice tone="error">{error}</Notice> : null}
         <Button className="w-full" disabled={!valid} busy={busy} onClick={onCreate}>
           Create house
