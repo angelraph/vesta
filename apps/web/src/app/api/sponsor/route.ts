@@ -1,8 +1,8 @@
 import { isAddress, parseEther } from "viem";
 import { allow, serverPublic, sponsorWallet } from "@/lib/server";
 
-const DRIP = parseEther("0.05");
-const FLOOR = parseEther("0.02");
+const DRIP = parseEther("0.15");
+const FLOOR = parseEther("0.05");
 
 export async function POST(req: Request) {
   const { address } = (await req.json().catch(() => ({}))) as { address?: string };
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
 
   const balance = await serverPublic.getBalance({ address });
   if (balance >= FLOOR) return Response.json({ ok: true });
-  if (!allow(`gas:${address.toLowerCase()}`, 60_000)) {
+  if (!allow(`gas:${address.toLowerCase()}`, 20_000)) {
     return Response.json({ error: "Fees were just topped up. Give it a minute." }, { status: 429 });
   }
   const hash = await wallet.sendTransaction({ to: address, value: DRIP });

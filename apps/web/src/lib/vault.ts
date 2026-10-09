@@ -123,7 +123,7 @@ export async function getName(who: Address) {
 
 async function ensureGas(s: Unlocked) {
   const mon = await publicClient.getBalance({ address: s.address });
-  if (mon > parseUnits("0.02", 18)) return;
+  if (mon > parseUnits("0.05", 18)) return;
   const res = await fetch("/api/sponsor", {
     method: "POST",
     headers: { "content-type": "application/json" },
