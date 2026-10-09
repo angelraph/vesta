@@ -29,7 +29,7 @@ function dueText(days: number, ts: bigint) {
 
 export default function Home() {
   const s = useSession();
-  const { loading, view, balances, houseIds, refresh } = useHome(s);
+  const { loading, view, balances, houseIds, name, refresh } = useHome(s);
   const fx = useFx();
   const activity = useActivity(s?.address, houseIds, 6);
   const { busy, error, run } = useAction();
@@ -87,10 +87,10 @@ export default function Home() {
       {/* header */}
       <header className="pt-safe flex items-center justify-between pb-1">
         <Link href="/house" className="flex items-center gap-3">
-          <Avatar name={me?.name ?? "You"} size={42} />
+          <Avatar name={me?.name ?? name ?? "You"} size={42} />
           <div>
             <p className="text-[13px] text-ink-2">{greeting()}</p>
-            <p className="text-[17px] font-bold leading-tight">{me?.name ?? (loading ? "…" : "Welcome")}</p>
+            <p className="text-[17px] font-bold leading-tight">{me?.name ?? name ?? (loading ? "…" : "Welcome")}</p>
           </div>
         </Link>
         <Link href="/steward" className="flex size-11 items-center justify-center rounded-full bg-surface shadow-[0_0_0_1px_rgba(15,31,26,0.06)]" aria-label="Steward">

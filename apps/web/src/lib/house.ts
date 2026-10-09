@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import type { Unlocked } from "./account";
 import { useLive } from "./hooks";
-import { getBalances, getHouse, getMembers, getMyHouses, type House, type Member } from "./vault";
+import { getBalances, getHouse, getMembers, getMyHouses, getName, type House, type Member } from "./vault";
 
 const PICK = "vesta.house";
 
@@ -35,6 +35,7 @@ export function useHome(s: Unlocked | null) {
   );
 
   const balances = useLive(s ? () => getBalances(s.address) : null, [s?.address], 6_000);
+  const name = useLive(s ? () => getName(s.address) : null, [s?.address], 5_000);
 
   const pick = useCallback((id: bigint) => {
     try {
@@ -53,6 +54,7 @@ export function useHome(s: Unlocked | null) {
     current,
     view: view.data,
     balances: balances.data,
+    name: name.data || null,
     pick,
     refresh,
   };

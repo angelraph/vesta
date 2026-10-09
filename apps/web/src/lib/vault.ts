@@ -134,7 +134,14 @@ async function ensureGas(s: Unlocked) {
     throw new Error(error || "We couldn't top up network fees right now. Try again in a minute.");
   }
   const { hash } = (await res.json()) as { hash?: Hex };
-  if (hash) await confirmTx(hash);
+  if (!hash) return;
+  const funded = await confirmTx(hash);
+  // Monad checks senders against state from 3 blocks back, and a first send
+  // made before then gets refused. Let the new balance settle first.
+  const until = Date.now() + 8_000;
+  while (Date.now() < until && (await publicClient.getBlockNumber().catch(() => 0n)) < funded.blockNumber + 4n) {
+    await new Promise((ok) => setTimeout(ok, 400));
+  }
 }
 
 async function ensureAllowance(s: Unlocked, amount: bigint) {
@@ -145,16 +152,35 @@ async function ensureAllowance(s: Unlocked, amount: bigint) {
     args: [s.address, addresses.houseVault],
   });
   if (allowance >= amount) return;
-  const hash = await s.wallet.writeContract({
-    address: addresses.ausd,
-    abi: erc20Abi,
-    functionName: "approve",
-    args: [addresses.houseVault, maxUint256],
-  });
+  const hash = await sendWithRetry(() =>
+    s.wallet.writeContract({
+      address: addresses.ausd,
+      abi: erc20Abi,
+      functionName: "approve",
+      args: [addresses.houseVault, maxUint256],
+    }),
+  );
   await confirmTx(hash);
 }
 
 export const usdText = (v: bigint) => `$${fromUnits(v).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+/**
+ * Monad checks a sender against state from a few blocks back, so a brand-new
+ * account's first transaction can bounce right after its gas money lands.
+ * Those rejections happen before anything is sent, so retrying is safe.
+ */
+async function sendWithRetry(write: () => Promise<Hex>) {
+  for (let i = 0; ; i++) {
+    try {
+      return await write();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      if (i >= 9 || !/Missing or invalid parameters|insufficient funds for gas|insufficient balance for transfer/i.test(msg)) throw e;
+      await new Promise((ok) => setTimeout(ok, 1000));
+    }
+  }
+}
 
 async function send(s: Unlocked, write: () => Promise<Hex>, spend?: bigint) {
   touch();
@@ -164,7 +190,7 @@ async function send(s: Unlocked, write: () => Promise<Hex>, spend?: bigint) {
   }
   await ensureGas(s);
   if (spend) await ensureAllowance(s, spend);
-  const hash = await write();
+  const hash = await sendWithRetry(write);
   const receipt = await confirmTx(hash);
   if (receipt.status !== "success") throw new Error("The transaction didn't go through.");
   return { hash, receipt };

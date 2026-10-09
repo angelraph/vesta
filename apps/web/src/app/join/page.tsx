@@ -55,12 +55,12 @@ export default function Join() {
   const onNew = () =>
     run(async () => {
       const s = await createAccount(name.trim());
-      await setName(s, name.trim());
       await fetch("/api/starter", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ address: s.address }),
       }).catch(() => null);
+      await setName(s, name.trim());
       await finish(s);
     });
 

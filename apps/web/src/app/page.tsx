@@ -26,12 +26,12 @@ export default function Welcome() {
   const onCreate = () =>
     run(async () => {
       const s = await createAccount(name.trim());
-      await setName(s, name.trim());
       await fetch("/api/starter", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ address: s.address }),
       }).catch(() => null);
+      await setName(s, name.trim());
       router.replace("/home");
     });
 

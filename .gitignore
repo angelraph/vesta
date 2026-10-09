@@ -8,3 +8,4 @@ contracts/cache
 contracts/types
 indexer/generated
 .DS_Store
+video/out
