@@ -19,7 +19,33 @@ import { addresses, AUSD_DECIMALS, chain } from "./config";
 import { touch, type Unlocked } from "./account";
 import { deriveAesKey, fromB64Url, importAesKey, NS, open, randomBytes, seal, toB64Url } from "./keys";
 
-export const publicClient = createPublicClient({ chain, transport: http() });
+// The public Monad RPC can rate limit or drop a request now and then, so every
+// read retries a few times before giving up.
+export const publicClient = createPublicClient({ chain, transport: http(undefined, { retryCount: 4, retryDelay: 400 }), pollingInterval: 500 });
+
+export class StillConfirming extends Error {
+  constructor() {
+    super("It went through, but the network is slow to confirm. Check Activity in a minute before trying again.");
+  }
+}
+
+/**
+ * Waits for a transaction we already sent. A hiccup while waiting doesn't mean
+ * it failed, so keep checking for up to a minute before saying anything.
+ */
+export async function confirmTx(hash: Hex) {
+  const until = Date.now() + 60_000;
+  while (Date.now() < until) {
+    try {
+      return await publicClient.waitForTransactionReceipt({ hash, timeout: 20_000 });
+    } catch {
+      const r = await publicClient.getTransactionReceipt({ hash }).catch(() => null);
+      if (r) return r;
+      await new Promise((ok) => setTimeout(ok, 1500));
+    }
+  }
+  throw new StillConfirming();
+}
 
 const vault = { address: addresses.houseVault, abi: houseVaultAbi } as const;
 
@@ -108,7 +134,7 @@ async function ensureGas(s: Unlocked) {
     throw new Error(error || "We couldn't top up network fees right now. Try again in a minute.");
   }
   const { hash } = (await res.json()) as { hash?: Hex };
-  if (hash) await publicClient.waitForTransactionReceipt({ hash });
+  if (hash) await confirmTx(hash);
 }
 
 async function ensureAllowance(s: Unlocked, amount: bigint) {
@@ -125,7 +151,7 @@ async function ensureAllowance(s: Unlocked, amount: bigint) {
     functionName: "approve",
     args: [addresses.houseVault, maxUint256],
   });
-  await publicClient.waitForTransactionReceipt({ hash });
+  await confirmTx(hash);
 }
 
 async function send(s: Unlocked, write: () => Promise<Hex>, spend?: bigint) {
@@ -133,7 +159,7 @@ async function send(s: Unlocked, write: () => Promise<Hex>, spend?: bigint) {
   await ensureGas(s);
   if (spend) await ensureAllowance(s, spend);
   const hash = await write();
-  const receipt = await publicClient.waitForTransactionReceipt({ hash });
+  const receipt = await confirmTx(hash);
   if (receipt.status !== "success") throw new Error("The transaction didn't go through.");
   return { hash, receipt };
 }

@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { isAddress } from "viem";
 import { useSession } from "@/lib/hooks";
-import { createHouse } from "@/lib/vault";
+import { createHouse, StillConfirming } from "@/lib/vault";
 import { Button, Field, Notice, PageTitle, TopBar, cleanAmount, useAction } from "@/components/ui";
 
 function nextFirst() {
@@ -26,16 +26,21 @@ export default function NewHouse() {
   async function onCreate() {
     if (!s || !valid) return;
     await run(async () => {
-      const res = await createHouse(s, {
-        name: name.trim(),
-        landlord: landlord as `0x${string}`,
-        rentUsd: rent,
-        firstDue: new Date(`${due}T09:00:00`),
-        periodDays: 30,
-      });
       try {
-        localStorage.setItem("vesta.house", res.houseId.toString());
-      } catch {}
+        const res = await createHouse(s, {
+          name: name.trim(),
+          landlord: landlord as `0x${string}`,
+          rentUsd: rent,
+          firstDue: new Date(`${due}T09:00:00`),
+          periodDays: 30,
+        });
+        try {
+          localStorage.setItem("vesta.house", res.houseId.toString());
+        } catch {}
+      } catch (e) {
+        // Already sent, just slow to confirm. Don't invite a second house.
+        if (!(e instanceof StillConfirming)) throw e;
+      }
       router.replace("/house");
     });
   }

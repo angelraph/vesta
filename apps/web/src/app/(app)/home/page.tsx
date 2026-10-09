@@ -6,7 +6,7 @@ import { Check, ChevronRight, Home as HomeIcon, Plus, Send, SplitSquareHorizonta
 import { useSession } from "@/lib/hooks";
 import { daysUntil, useFx, useHome } from "@/lib/house";
 import { useActivity } from "@/lib/activity";
-import { collectRent, fromUnits, payRent, publicClient } from "@/lib/vault";
+import { collectRent, confirmTx, fromUnits, payRent } from "@/lib/vault";
 import { ActivityList } from "@/components/ActivityList";
 import { Avatar, Button, Card, Money, Notice, QuickAction, SectionTitle, Skeleton, SuccessMark, useAction } from "@/components/ui";
 import { Mark } from "@/components/Logo";
@@ -62,7 +62,7 @@ export default function Home() {
       });
       const out = (await res.json().catch(() => ({}))) as { hash?: `0x${string}`; error?: string };
       if (!res.ok || !out.hash) throw new Error(out.error || "Couldn't send test money right now. Try again in a minute.");
-      await publicClient.waitForTransactionReceipt({ hash: out.hash });
+      await confirmTx(out.hash);
       await refresh();
     });
   }

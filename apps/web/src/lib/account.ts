@@ -171,7 +171,10 @@ export function friendlyError(e: unknown): string {
     }
   }
   const msg = e instanceof Error ? e.message : String(e);
+  if (msg.length > 160 || /HTTP request failed|rate limit|429|timed? ?out/i.test(msg)) console.error("vesta", e);
   if (/insufficient funds/i.test(msg)) return "Not enough to cover that yet.";
+  if (/HTTP request failed|rate limit|429|fetch failed|Failed to fetch/i.test(msg)) return "The network is busy right now. Wait a moment and try again.";
+  if (/timed? ?out|TimeoutError/i.test(msg)) return "The network is slow right now. Check Activity before trying again.";
   if (/User rejected|NotAllowedError/i.test(msg)) return "Cancelled.";
   return msg.length > 160 ? "Something went wrong. Please try again." : msg;
 }
