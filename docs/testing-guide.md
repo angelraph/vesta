@@ -55,5 +55,5 @@ No invite link? Open https://vesta-pi-neon.vercel.app, tap **"Get started"**, ty
 ## For the host (before inviting anyone)
 
 1. Open https://vesta-pi-neon.vercel.app on your phone and create your account.
-2. Tap **Set up a house**. Use a small rent like **$40** (it's split between everyone, and testers only have $25), a first rent day about a week away, and your own Vesta address as "Who gets paid" (find it on the House tab).
+2. Tap **Set up a house**. Use a small rent like **$40** (it's split between everyone, and testers only have $25), a first rent day about a week away, and tap **"I collect the rent myself"** under "Who gets paid".
 3. On the **House** tab, tap **Invite a housemate**. The link is copied. Send it with this guide.
