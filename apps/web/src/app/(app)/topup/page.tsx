@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { Check, Copy, Globe2, Users } from "lucide-react";
+import { Check, Copy, Sparkles } from "lucide-react";
 import { useSession } from "@/lib/hooks";
-import { Card, IconBubble, Notice, SectionTitle, TopBar } from "@/components/ui";
+import { Card, IconBubble, SectionTitle, TopBar } from "@/components/ui";
+import { TEST_CAP, TEST_GRANT, TestMoneyButton } from "@/components/TestMoney";
 
 export default function TopUp() {
   const s = useSession();
@@ -45,24 +46,22 @@ export default function TopUp() {
       </div>
 
       <div>
-        <SectionTitle>From crypto you already hold</SectionTitle>
-        <Card className="flex items-start gap-3">
-          <IconBubble tone="ember">
-            <Globe2 size={18} />
-          </IconBubble>
-          <div>
-            <p className="font-semibold">USDC, USDT or SOL from 30+ networks</p>
-            <p className="mt-0.5 text-[13.5px] text-ink-2">One address that takes money from wherever you hold it and lands it in your house. Switching on shortly.</p>
+        <SectionTitle>Test money</SectionTitle>
+        <Card className="space-y-3">
+          <div className="flex items-start gap-3">
+            <IconBubble tone="ember">
+              <Sparkles size={18} />
+            </IconBubble>
+            <div>
+              <p className="font-semibold">Try everything for free</p>
+              <p className="mt-0.5 text-[13.5px] text-ink-2">
+                Vesta runs on a test network. Add ${TEST_GRANT} of test money any time you have less than ${TEST_CAP}. It isn&apos;t real money.
+              </p>
+            </div>
           </div>
+          <TestMoneyButton s={s} />
         </Card>
       </div>
-
-      <Notice>
-        <span className="flex items-start gap-2">
-          <Users size={16} className="mt-0.5 shrink-0" />
-          New to Vesta? Your first few dollars to try it out are on us, sent when you create your account.
-        </span>
-      </Notice>
     </div>
   );
 }

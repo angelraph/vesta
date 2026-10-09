@@ -1,6 +1,6 @@
 # Testing Vesta
 
-About 5 minutes. **It's not real money.** Vesta runs on Monad testnet, and every new account gets $25 of test money to play with. Nothing you do costs you anything.
+About 5 minutes. **It's not real money.** Vesta runs on Monad testnet, and every new account gets $100 of test money to play with. Nothing you do costs you anything.
 
 **App:** https://vesta-pi-neon.vercel.app
 
@@ -18,9 +18,9 @@ About 5 minutes. **It's not real money.** Vesta runs on Monad testnet, and every
 3. Tap **"Move in with a passkey"**.
 4. Your phone asks to save a passkey for Vesta. Tap **Continue** (or **Save**), then use Face ID, your fingerprint or your PIN.
 5. Wait a few seconds. You land on the Vesta home screen. That's your account made: no password, no email.
-6. Look at **"Your balance"**. Within about a minute it shows **$25.00**. If it still says $0, pull down to refresh.
+6. Look at **"Your balance"**. Within about a minute it shows **$100.00**. If it still says $0, pull down to refresh.
 
-No invite link? Open https://vesta-pi-neon.vercel.app, tap **"Get started"**, type your name and tap **"Create with passkey"**. You'll get your own account and $25 of test money, just not a house.
+No invite link? Open https://vesta-pi-neon.vercel.app, tap **"Get started"**, type your name and tap **"Create with passkey"**. You'll get your own account and $100 of test money, just not a house.
 
 ## Part 2: Send $1
 
@@ -50,10 +50,10 @@ No invite link? Open https://vesta-pi-neon.vercel.app, tap **"Get started"**, ty
 | "This invite doesn't work" | Ask for a fresh invite link. |
 | No passkey popup | Make sure you're in Safari (iPhone) or Chrome (Android), not inside WhatsApp. |
 | You already made a Vesta account | Tap **"I already use Vesta"** instead of step 3. |
-| Balance stays at $0 | Tap **"Get $25 of test money"** on the home screen. |
+| Running low on money | Tap **"Add $100 of test money"** on the home screen or the Add money page. You can do it again whenever you have under $500. |
 
 ## For the host (before inviting anyone)
 
 1. Open https://vesta-pi-neon.vercel.app on your phone and create your account.
-2. Tap **Set up a house**. Use a small rent like **$40** (it's split between everyone, and testers only have $25), a first rent day about a week away, and tap **"I collect the rent myself"** under "Who gets paid".
+2. Tap **Set up a house**. Use a rent like **$100** (it's split between everyone, and each tester starts with $100), a first rent day about a week away, and tap **"I collect the rent myself"** under "Who gets paid".
 3. On the **House** tab, tap **Invite a housemate**. The link is copied. Send it with this guide.

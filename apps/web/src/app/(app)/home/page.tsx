@@ -6,7 +6,8 @@ import { Check, ChevronRight, Home as HomeIcon, Plus, Send, SplitSquareHorizonta
 import { useSession } from "@/lib/hooks";
 import { daysUntil, useFx, useHome } from "@/lib/house";
 import { useActivity } from "@/lib/activity";
-import { collectRent, confirmTx, fromUnits, payRent, usdText } from "@/lib/vault";
+import { collectRent, fromUnits, payRent, usdText } from "@/lib/vault";
+import { TestMoneyButton } from "@/components/TestMoney";
 import { ActivityList } from "@/components/ActivityList";
 import { Avatar, Button, Card, Money, Notice, QuickAction, SectionTitle, Skeleton, SuccessMark, useAction } from "@/components/ui";
 import { Mark } from "@/components/Logo";
@@ -54,21 +55,6 @@ export default function Home() {
   const short = view?.members
     .map((m) => ({ m, left: share > m.rentPaid ? share - m.rentPaid : 0n }))
     .filter((x) => x.left > 0n && x.m.address.toLowerCase() !== s.address.toLowerCase());
-
-  // Testnet only: anyone at $0 can draw the same $25 of test money new accounts get.
-  async function onStarter() {
-    await run(async () => {
-      const res = await fetch("/api/starter", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ address: s!.address }),
-      });
-      const out = (await res.json().catch(() => ({}))) as { hash?: `0x${string}`; error?: string };
-      if (!res.ok || !out.hash) throw new Error(out.error || "Couldn't send test money right now. Try again in a minute.");
-      await confirmTx(out.hash);
-      await refresh();
-    });
-  }
 
   async function onPayShare() {
     if (!view || payable === 0n) return;
@@ -294,12 +280,10 @@ export default function Home() {
             </span>
             <div className="flex-1">
               <p className="font-semibold">Add money to get started</p>
-              <p className="text-[13px] text-ink-2">Vesta is on a test network, so you can start with $25 of test money.</p>
+              <p className="text-[13px] text-ink-2">Vesta runs on a test network, so you can add $100 of test money to try everything.</p>
             </div>
           </div>
-          <Button className="w-full" busy={busy} onClick={onStarter}>
-            Get $25 of test money
-          </Button>
+          <TestMoneyButton s={s} onDone={refresh} />
           <Link href="/topup" className="block text-center text-[13px] font-semibold text-hearth">
             Other ways to add money
           </Link>
