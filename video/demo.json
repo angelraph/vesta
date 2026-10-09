@@ -1,0 +1,130 @@
+{
+  "voice": "en-NG-EzinneNeural",
+  "rate": "+4%",
+  "scenes": [
+    {
+      "title": "The bank account for a household",
+      "sub": "Rent, bills and money home in one shared account",
+      "say": "This is Vesta. Amina lives in Hackney with her housemates, and sends money home to her mum in Lagos. Today that takes three apps, a spreadsheet in her head, and a lot of chasing. Vesta puts it all in one account the whole house shares.",
+      "phones": [
+        {
+          "who": "amina",
+          "from": "landing",
+          "to": "signup"
+        }
+      ]
+    },
+    {
+      "title": "Sign up with your face",
+      "sub": "One Mera passkey. No password, no seed phrase.",
+      "say": "She signs up with just her face. No password, no seed phrase, nothing to write down. Her account comes with test money so she can try everything.",
+      "phones": [
+        {
+          "who": "amina",
+          "from": "signup",
+          "to": "house"
+        }
+      ]
+    },
+    {
+      "title": "Set up the house",
+      "sub": "Rent split evenly, invite by private link",
+      "say": "She sets up the house. Sixty dollars of rent, split evenly between everyone, and she sends Tobi a private invite link.",
+      "phones": [
+        {
+          "who": "amina",
+          "from": "house",
+          "to": "pay"
+        }
+      ]
+    },
+    {
+      "title": "Tobi moves in",
+      "sub": "His own passkey, straight into the house",
+      "say": "Tobi taps the link and moves in with his own passkey. He lands straight in the house, and sees exactly what he owes.",
+      "phones": [
+        {
+          "who": "tobi",
+          "from": "join",
+          "to": "pay"
+        }
+      ]
+    },
+    {
+      "title": "Rent that fills itself",
+      "sub": "Everyone pays into one pot on Monad",
+      "say": "Both of them pay their share into the rent pot. When it's full, a Chainlink workflow pays the landlord on rent day, and flags anyone who's short before it comes.",
+      "phones": [
+        {
+          "who": "tobi",
+          "from": "pay",
+          "to": "settle"
+        },
+        {
+          "who": "amina",
+          "from": "pay",
+          "to": "split"
+        }
+      ]
+    },
+    {
+      "title": "Splits without the chasing",
+      "sub": "Add it once, settle with a tap",
+      "say": "Amina adds last night's dinner to the tab, and Tobi settles up with one tap. Nobody has to chase anybody.",
+      "phones": [
+        {
+          "who": "amina",
+          "from": "split",
+          "to": "send"
+        },
+        {
+          "who": "tobi",
+          "from": "settle",
+          "to": "end"
+        }
+      ]
+    },
+    {
+      "title": "Money home in seconds",
+      "sub": "Settled instantly through Agora. No fee.",
+      "say": "Then she sends fifty dollars home to Mama. It settles instantly through Agora on Monad, with no fee, and Mama gets a receipt she can open on any phone.",
+      "phones": [
+        {
+          "who": "amina",
+          "from": "send",
+          "to": "steward"
+        }
+      ]
+    },
+    {
+      "title": "A steward that keeps the books",
+      "sub": "Answers from the real ledger, indexed by Envio",
+      "say": "The steward keeps the books. It reads the house ledger, indexed by Envio, and answers in plain words. It can suggest a payment, but only Amina can make one.",
+      "phones": [
+        {
+          "who": "amina",
+          "from": "steward",
+          "to": "wipe",
+          "skip": 4
+        }
+      ]
+    },
+    {
+      "title": "Lose the phone, keep the house",
+      "sub": "Wipe everything. Unlock with the passkey. It all comes back.",
+      "say": "And if she loses her phone? Wipe everything, unlock with the same passkey, and the whole household comes back. Her keys, her house, her notes. Nothing was stored on a server.",
+      "phones": [
+        {
+          "who": "amina",
+          "from": "wipe",
+          "to": "end"
+        }
+      ]
+    }
+  ],
+  "outro": {
+    "title": "Vesta",
+    "sub": "Money for the people you live with.",
+    "say": "Vesta. Money for the people you live with."
+  }
+}
