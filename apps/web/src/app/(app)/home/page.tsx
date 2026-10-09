@@ -6,7 +6,7 @@ import { Check, ChevronRight, Home as HomeIcon, Plus, Send, SplitSquareHorizonta
 import { useSession } from "@/lib/hooks";
 import { daysUntil, useFx, useHome } from "@/lib/house";
 import { useActivity } from "@/lib/activity";
-import { collectRent, fromUnits, payRent } from "@/lib/vault";
+import { collectRent, fromUnits, payRent, publicClient } from "@/lib/vault";
 import { ActivityList } from "@/components/ActivityList";
 import { Avatar, Button, Card, Money, Notice, QuickAction, SectionTitle, Skeleton, SuccessMark, useAction } from "@/components/ui";
 import { Mark } from "@/components/Logo";
@@ -51,6 +51,21 @@ export default function Home() {
   const short = view?.members
     .map((m) => ({ m, left: share > m.rentPaid ? share - m.rentPaid : 0n }))
     .filter((x) => x.left > 0n && x.m.address.toLowerCase() !== s.address.toLowerCase());
+
+  // Testnet only: anyone at $0 can draw the same $25 of test money new accounts get.
+  async function onStarter() {
+    await run(async () => {
+      const res = await fetch("/api/starter", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ address: s!.address }),
+      });
+      const out = (await res.json().catch(() => ({}))) as { hash?: `0x${string}`; error?: string };
+      if (!res.ok || !out.hash) throw new Error(out.error || "Couldn't send test money right now. Try again in a minute.");
+      await publicClient.waitForTransactionReceipt({ hash: out.hash });
+      await refresh();
+    });
+  }
 
   async function onPayShare() {
     if (!view || myLeft === 0n) return;
@@ -261,18 +276,23 @@ export default function Home() {
       </div>
 
       {balances && fromUnits(balances.ausd) === 0 && !loading ? (
-        <Link href="/topup">
-          <Card className="flex items-center gap-3">
+        <Card className="space-y-3">
+          <div className="flex items-center gap-3">
             <span className="flex size-10 items-center justify-center rounded-full bg-ember-tint text-ember">
               <Wallet size={18} />
             </span>
             <div className="flex-1">
               <p className="font-semibold">Add money to get started</p>
-              <p className="text-[13px] text-ink-2">From a friend on Vesta, or from crypto you already hold.</p>
+              <p className="text-[13px] text-ink-2">Vesta is on a test network, so you can start with $25 of test money.</p>
             </div>
-            <ChevronRight size={18} className="text-ink-3" />
-          </Card>
-        </Link>
+          </div>
+          <Button className="w-full" busy={busy} onClick={onStarter}>
+            Get $25 of test money
+          </Button>
+          <Link href="/topup" className="block text-center text-[13px] font-semibold text-hearth">
+            Other ways to add money
+          </Link>
+        </Card>
       ) : null}
     </div>
   );

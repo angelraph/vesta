@@ -105,7 +105,11 @@ const tools = [
 ] as const;
 
 async function houseStatus(me: Address, houseId: bigint | null) {
-  if (!houseId) return { inHouse: false };
+  if (!houseId)
+    return {
+      inHouse: false,
+      note: "They haven't set up or joined a house yet, so there is no rent to track. Tell them plainly and point them to Set up a house on the House tab, or the invite link a housemate sent them.",
+    };
   const [h, [addrs, paid, share]] = await Promise.all([
     serverPublic.readContract({ ...vault, functionName: "getHouse", args: [houseId] }),
     serverPublic.readContract({ ...vault, functionName: "rentStatus", args: [houseId] }),
@@ -241,6 +245,7 @@ export async function runSteward(input: { me: Address; name: string; houseId: bi
             result = { error: "Unknown tool" };
         }
       } catch (e) {
+        console.error("steward tool", call.function.name, e);
         result = { error: e instanceof Error ? e.message : "Tool failed" };
       }
       msgs.push({ role: "tool", tool_call_id: call.id, content: JSON.stringify(result) });
