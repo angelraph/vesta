@@ -6,7 +6,7 @@ import { Check, ChevronRight, Home as HomeIcon, Plus, Send, SplitSquareHorizonta
 import { useSession } from "@/lib/hooks";
 import { daysUntil, useFx, useHome } from "@/lib/house";
 import { useActivity } from "@/lib/activity";
-import { collectRent, fromUnits, payRent, usdText } from "@/lib/vault";
+import { collectRent, fromUnits, payRent, setName, usdText } from "@/lib/vault";
 import { TestMoneyButton } from "@/components/TestMoney";
 import { ActivityList } from "@/components/ActivityList";
 import { Avatar, Button, Card, CountUp, Money, Notice, QuickAction, SectionTitle, Skeleton, SuccessMark, useAction } from "@/components/ui";
@@ -29,7 +29,8 @@ function dueText(days: number, ts: bigint) {
 
 export default function Home() {
   const s = useSession();
-  const { loading, view, balances, houseIds, name, refresh } = useHome(s);
+  const { loading, view, balances, houseIds, name, nameMissing, refreshName, refresh } = useHome(s);
+  const [newName, setNewName] = useState("");
   const fx = useFx();
   const activity = useActivity(s?.address, houseIds, 6);
   const { busy, error, run } = useAction();
@@ -97,6 +98,38 @@ export default function Home() {
           <Mark size={24} animated />
         </Link>
       </header>
+
+      {nameMissing ? (
+        <Card className="space-y-3">
+          <div>
+            <p className="font-bold">What should your housemates call you?</p>
+            <p className="text-[13.5px] text-ink-2">Right now they see a code instead of your name.</p>
+          </div>
+          <div className="flex gap-2">
+            <input
+              value={newName}
+              maxLength={32}
+              placeholder="Your name"
+              onChange={(e) => setNewName(e.target.value)}
+              className="h-12 min-w-0 flex-1 rounded-xl bg-sunken px-4 text-[16px] outline-none focus:shadow-[0_0_0_2px_var(--hearth)]"
+            />
+            <Button
+              size="md"
+              className="h-12"
+              busy={busy}
+              disabled={newName.trim().length < 2}
+              onClick={() =>
+                run(async () => {
+                  await setName(s!, newName.trim());
+                  await Promise.all([refreshName(), refresh()]);
+                })
+              }
+            >
+              Save
+            </Button>
+          </div>
+        </Card>
+      ) : null}
 
       {/* balance */}
       <section className="px-1 text-center">

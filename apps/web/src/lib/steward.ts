@@ -178,7 +178,9 @@ How you talk:
 - Warm, brief and plain, like a thoughtful housemate. One to three short sentences unless they ask for detail.
 - Money in US dollars like $40.00. Say "rent pot", "shared costs", "send home". Never mention blockchains, wallets, tokens, gas or addresses.
 - Use the tools for any fact about money. Never guess a number.
-- You can't move money. When an action would help, call suggest_action so they get a button. The button appears right under your reply, so say "tap the button below", never offer to add one. Before suggesting a payment, check get_balance: if they can't cover it all, say so and suggest paying what they have now. For reminders to housemates, call draft_message the same way.
+- You can't move money. When an action would help, call suggest_action so they get a button. Before suggesting a payment, check get_balance: if they can't cover it all, say so and suggest paying what they have now.
+- To remind a housemate, call draft_message with a friendly note addressed to them. It appears as a card with a Send button.
+- Only mention a button ("tap the button below") when you have called suggest_action or draft_message in this same reply. Never offer to add one later.
 - If you learn a lasting habit or preference, call remember. Never store passwords, codes or anything sensitive.
 - If something isn't available yet, say so simply.
 
@@ -192,7 +194,8 @@ export async function runSteward(input: { me: Address; name: string; houseId: bi
   const cards: StewardCard[] = [];
   const msgs: ChatMessage[] = [{ role: "system", content: system(input.name, input.memory.slice(0, 30)) }, ...input.messages.slice(-12)];
 
-  for (let round = 0; round < 6; round++) {
+  let nudged = false;
+  for (let round = 0; round < 7; round++) {
     const body: Record<string, unknown> = { model: MODEL, messages: msgs, tools, max_completion_tokens: 2000 };
     // Reasoning models think before answering; keep it light so replies stay quick.
     if (/^(gpt-5|o\d)/.test(MODEL)) body.reasoning_effort = "low";
@@ -208,7 +211,20 @@ export async function runSteward(input: { me: Address; name: string; houseId: bi
     msgs.push({ role: "assistant", content: choice.message.content ?? null, ...(choice.message.tool_calls?.length ? { tool_calls: choice.message.tool_calls } : {}) });
     const calls = choice.message.tool_calls ?? [];
     if (choice.finish_reason !== "tool_calls" || calls.length === 0) {
-      return { reply: (choice.message.content ?? "").trim(), cards };
+      const reply = (choice.message.content ?? "").trim();
+      // The reply points at a button but no card was made: have it make one, or reword. Once.
+      const promised = /\bbutton\b|tap (?:below|here)/i.test(reply);
+      const madeOne = cards.some((c) => c.type === "action" || c.type === "message");
+      if (promised && !madeOne && !nudged) {
+        nudged = true;
+        msgs.push({
+          role: "user",
+          content:
+            "(System check, not from the person: your reply mentions a button, but you didn't call a tool. Call suggest_action or draft_message now so the button appears, or answer again without mentioning a button.)",
+        });
+        continue;
+      }
+      return { reply: promised && !madeOne ? reply.replace(/[^.!?]*\b(?:button|tap below)\b[^.!?]*[.!?]?/gi, "").trim() : reply, cards };
     }
     for (const call of calls) {
       let result: unknown;

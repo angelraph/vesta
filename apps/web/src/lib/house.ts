@@ -55,6 +55,8 @@ export function useHome(s: Unlocked | null) {
     view: view.data,
     balances: balances.data,
     name: name.data || null,
+    nameMissing: name.data === "",
+    refreshName: name.refresh,
     pick,
     refresh,
   };
