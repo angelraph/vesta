@@ -108,7 +108,7 @@ export async function getMembers(id: bigint): Promise<{ members: Member[]; share
   });
   const members = addrs.map((address, i) => ({
     address,
-    name: (extra[i * 2] as string) || short(address),
+    name: (extra[i * 2] as string) || "Housemate",
     rentPaid: paid[i],
     net: extra[i * 2 + 1] as bigint,
   }));

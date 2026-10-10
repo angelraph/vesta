@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import type { Unlocked } from "./account";
 import { useLive } from "./hooks";
-import { getBalances, getHouse, getMembers, getMyHouses, getName, type House, type Member } from "./vault";
+import { getBalances, getHouse, getMembers, getMyHouses, getName, readMemory, type House, type Member } from "./vault";
 
 const PICK = "vesta.house";
 
@@ -60,6 +60,15 @@ export function useHome(s: Unlocked | null) {
     pick,
     refresh,
   };
+}
+
+/** Address to display name, from housemates and the person's encrypted contact list. */
+export function useNames(s: Unlocked | null, members: Member[] | undefined) {
+  const contacts = useLive(s ? () => readMemory(s).then((m) => m.contacts ?? []).catch(() => []) : null, [s?.address], 60_000);
+  const out: Record<string, string> = {};
+  for (const c of contacts.data ?? []) out[c.address.toLowerCase()] = c.name;
+  for (const m of members ?? []) out[m.address.toLowerCase()] = m.name;
+  return out;
 }
 
 export type Fx = { rates: Record<string, number>; at: number };

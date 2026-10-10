@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Check, ChevronRight, Home as HomeIcon, Plus, Send, SplitSquareHorizontal, Sparkles, Wallet } from "lucide-react";
 import { useSession } from "@/lib/hooks";
-import { daysUntil, useFx, useHome } from "@/lib/house";
+import { daysUntil, useFx, useHome, useNames } from "@/lib/house";
 import { useActivity } from "@/lib/activity";
 import { collectRent, fromUnits, payRent, setName, usdText } from "@/lib/vault";
 import { TestMoneyButton } from "@/components/TestMoney";
@@ -36,10 +36,7 @@ export default function Home() {
   const { busy, error, run } = useAction();
   const [paid, setPaid] = useState<string | null>(null);
 
-  const names = useMemo(
-    () => Object.fromEntries((view?.members ?? []).map((m) => [m.address.toLowerCase(), m.name])),
-    [view],
-  );
+  const names = useNames(s, view?.members);
 
   if (!s) return null;
   const me = view?.me;

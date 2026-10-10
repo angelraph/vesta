@@ -157,7 +157,6 @@ export default function Send() {
 
         <Card className="mt-6 space-y-3.5 text-[15px]">
           <Line label="To" value={`${to.name} · ${c.name}`} />
-          <Line label="Their account" value={short(to.address)} />
           <Divider />
           <Line label="You send" value={<Money value={usdN} />} />
           <Line label="Fee" value={<span className="text-good">$0.00</span>} />

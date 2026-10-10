@@ -53,7 +53,7 @@ export function ActivityList({
   }
 
   const mine = me.toLowerCase();
-  const nameOf = (a: string | null) => (a ? (a.toLowerCase() === mine ? "You" : names[a.toLowerCase()] ?? short(a)) : "");
+  const nameOf = (a: string | null) => (a ? (a.toLowerCase() === mine ? "You" : names[a.toLowerCase()] ?? "Someone") : "");
   const days = items.map((a) => dayLabel(a.timestamp));
 
   return (

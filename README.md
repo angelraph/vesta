@@ -8,6 +8,23 @@ Shared rent, bill splits and money sent home, in one app you open with your face
 
 Built for the Monad Metropolis hackathon (Consumer Products & Payments).
 
+[![CI](https://github.com/angelraph/vesta/actions/workflows/ci.yml/badge.svg)](https://github.com/angelraph/vesta/actions/workflows/ci.yml)
+
+## At a glance
+
+| | |
+|---|---|
+| **Live app** | https://vesta-pi-neon.vercel.app, installable on a phone |
+| **Network** | Monad testnet (chain 10143). Every payment, split and rent cycle is a real transaction |
+| **Accounts** | One Mera passkey. No password, no seed phrase, no custody backend |
+| **Money home** | AUSD, settled instantly through Agora's Instant Settlement pair inside the send |
+| **Rent day** | A Chainlink CRE workflow pays the landlord or flags who's short, checked live with `--broadcast` |
+| **History** | Envio HyperIndex household ledger, hosted |
+| **Steward** | An AI agent with read-only tools over the house; it suggests, the passkey decides |
+| **Contract** | `HouseVault`, [verified on Sourcify](https://sourcify.dev/server/repo-ui/10143/0x1cb8182e22e7716f9dc9174f1be7591157288559) |
+| **Tests** | 11 contract tests, plus CI on every push: contract tests, app types and lint, workflow types |
+| **Tested by people** | Real testers from our community, on their own phones ([testing guide](docs/testing-guide.md)) |
+
 ## The problem
 
 Amina lives in Hackney with two housemates. Her mum lives in Lagos. Every month she:
@@ -112,7 +129,33 @@ cre workflow simulate rent-day --target staging-settings
 
 | | Address |
 |---|---|
-| HouseVault | `0x1cb8182e22e7716f9dc9174f1be7591157288559` |
+| HouseVault (verified) | [`0x1cb8182e22e7716f9dc9174f1be7591157288559`](https://sourcify.dev/server/repo-ui/10143/0x1cb8182e22e7716f9dc9174f1be7591157288559) |
 | AUSD | `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` |
 | Agora AUSD/CTK pair | `0x1Aa8958Aa34cEC8096EF4381cb335effe977b0ae` |
 | Envio GraphQL | https://indexer.dev.hyperindex.xyz/e32f57e/v1/graphql |
+
+### Proof transactions
+
+| What | Transaction |
+|---|---|
+| Money home, settled by Agora in one transaction | [`0x05c3…b2f5`](https://testnet.monadexplorer.com/tx/0x05c3f43dbb03b51c9507cb26687a82b52bfe353ddb4c2a09fb7ce1eab9a2b2f5) |
+| CRE rent day: shortfall flagged | [`0xdba7…c786`](https://testnet.monadexplorer.com/tx/0xdba7b20dfab5d7eef99399fcba6103cad97ff879adf6262a975b530374ffc786) |
+| CRE rent day: landlord paid | [`0xe23a…4014`](https://testnet.monadexplorer.com/tx/0xe23acc6217a14f040d29fcc8cbe12d2b56d5515148997baf862ade9ef6264014) |
+
+## Security and privacy
+
+- **No custody.** Keys are derived on the phone from the passkey's PRF output and never leave it. The server only sponsors network fees and hands out test money.
+- **Separate keys for separate jobs.** The signing key, each house's key and the steward's memory key come from the same passkey through different HKDF namespaces, so one never reveals another.
+- **Encrypted house data.** House notes and the steward's memory are stored onchain as ciphertext. The house key travels in the invite link after `#`, which browsers never send to a server.
+- **Rent can't be paid out early.** `collectRent` checks the due date and the pot. Rent-day reports are only accepted from the Chainlink forwarder.
+- **The steward can't move money.** It has read-only tools. Every payment needs the person's passkey.
+- **Session lock.** The app locks itself after 15 minutes without use.
+
+## Risks and limits
+
+- Vesta runs on **Monad testnet** with test AUSD. The money is not real yet.
+- `HouseVault` has **not had an external audit**. It holds pooled rent, so an audit comes before any mainnet launch.
+- Money home is paid out in Agora's testnet pair token (CTK) standing in for a local-currency stablecoin. Real cash-out to naira, cedis or shillings needs a licensed off-ramp partner.
+- The rent-day workflow runs as a CRE **simulation with `--broadcast`**. Deploying it to the CRE network needs deployment access from Chainlink.
+- Passkeys with PRF need **iOS 18+ Safari or Chrome on Android**. In-app browsers (Instagram, Facebook, Telegram) are detected and told to open the link in a browser.
+- The steward runs on OpenAI, so its answers are only as good as the model; every number it gives comes from a tool call against the contract or the indexer.
