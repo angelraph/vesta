@@ -5,5 +5,6 @@
   "keeper": "0xB9F79d863261869B234c481D1f9A7af84AeAd192",
   "settlement": "0x1Aa8958Aa34cEC8096EF4381cb335effe977b0ae",
   "payout": "0x7BEb5D9DB0d85cBEa543C04f0dE8c23c2176cd9D",
-  "startBlock": 69070143
+  "startBlock": 69070143,
+  "gasTap": "0x48fc665129ac0007f2c8d6d9ac9784f8650841cd"
 }

@@ -136,6 +136,7 @@ async function ensureGas(s: Unlocked) {
   const { hash } = (await res.json()) as { hash?: Hex };
   if (!hash) return;
   const funded = await confirmTx(hash);
+  if (funded.status !== "success") throw new Error("We couldn't top up network fees just now. Try again in a minute.");
   // Monad checks senders against state from 3 blocks back, and a first send
   // made before then gets refused. Let the new balance settle first.
   // Give it at least 4 seconds and 8 blocks; a send refused too early keeps
