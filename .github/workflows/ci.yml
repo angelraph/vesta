@@ -37,7 +37,9 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter contracts build
+      - name: Generate route types
+        working-directory: apps/web
+        run: npx next typegen
       - name: Typecheck
         working-directory: apps/web
         run: npx tsc --noEmit
