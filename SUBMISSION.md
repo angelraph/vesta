@@ -49,7 +49,7 @@ The blockchain stays invisible: dollars and names on every screen, network fees 
 
 ## Consumer track
 
-**Who it's for.** Diaspora housemates in UK cities who share rent and send money to family in West and East Africa. Amina in Hackney with two housemates and a mum in Lagos is our first user, not a persona we invented: our testers come from that community.
+**Who it's for.** Diaspora housemates in UK cities who share rent and send money to family in West and East Africa. Amina in Hackney, with two housemates and a mum in Lagos, is who every screen is designed around.
 
 **Distribution, the next 100 users.** Houses grow by invitation: one person sets up a house and every housemate joins through a private link, so each sign-up brings two or three more. We start where the users already gather: diaspora student societies and shared-housing WhatsApp groups in London, Manchester and Birmingham, then the recipients themselves, since every money-home receipt carries a "Get Vesta" link.
 
