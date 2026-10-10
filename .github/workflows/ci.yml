@@ -1,0 +1,57 @@
+name: CI
+
+permissions:
+  contents: read
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  contracts:
+    name: Contracts (Hardhat tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.20.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter contracts test
+
+  web:
+    name: App (types and lint)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.20.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter contracts build
+      - name: Typecheck
+        working-directory: apps/web
+        run: npx tsc --noEmit
+      - name: Lint
+        working-directory: apps/web
+        run: npx eslint src --quiet
+
+  workflow:
+    name: Chainlink CRE workflow (types)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+        working-directory: cre/rent-day
+      - run: bunx tsc --noEmit
+        working-directory: cre/rent-day
