@@ -192,6 +192,7 @@ export async function runSteward(input: { me: Address; name: string; houseId: bi
   const key = process.env.OPENAI_API_KEY;
   if (!key) throw new StewardOff();
   const cards: StewardCard[] = [];
+  let status: Awaited<ReturnType<typeof houseStatus>> | null = null;
   const msgs: ChatMessage[] = [{ role: "system", content: system(input.name, input.memory.slice(0, 30)) }, ...input.messages.slice(-12)];
 
   let nudged = false;
@@ -224,7 +225,22 @@ export async function runSteward(input: { me: Address; name: string; houseId: bi
         });
         continue;
       }
-      return { reply: promised && !madeOne ? reply.replace(/[^.!?]*\b(?:button|tap below)\b[^.!?]*[.!?]?/gi, "").trim() : reply, cards };
+      let final = promised && !madeOne ? reply.replace(/[^.!?]*\b(?:button|tap below)\b[^.!?]*[.!?]?/gi, "").trim() : reply;
+      // Whenever the answer covers housemates who still owe rent, hand over a ready reminder for each.
+      const owing = status && "housemates" in status ? (status.housemates ?? []).filter((h) => !h.isYou && h.stillOwesRent > 0) : [];
+      const drafted = new Set(cards.flatMap((c) => (c.type === "message" ? [c.to.toLowerCase()] : [])));
+      const add = owing.filter((h) => !drafted.has(h.name.toLowerCase())).slice(0, 3);
+      if (add.length && status && "rentDay" in status) {
+        for (const h of add) {
+          cards.push({
+            type: "message",
+            to: h.name,
+            text: `Hey ${h.name}, quick heads-up: your share of rent for ${status.house} is $${h.stillOwesRent.toFixed(2)}, due ${status.rentDay}. You can pay it in Vesta in one tap. Thanks!`,
+          });
+        }
+        final += add.length === 1 ? ` I've drafted a friendly reminder for ${add[0].name} below.` : " I've drafted a friendly reminder for each of them below.";
+      }
+      return { reply: final.trim(), cards };
     }
     for (const call of calls) {
       let result: unknown;
@@ -232,7 +248,7 @@ export async function runSteward(input: { me: Address; name: string; houseId: bi
         const args = JSON.parse(call.function.arguments || "{}");
         switch (call.function.name) {
           case "get_house_status":
-            result = await houseStatus(input.me, input.houseId);
+            result = status = await houseStatus(input.me, input.houseId);
             break;
           case "get_recent_activity":
             result = await recentActivity(input.me, input.houseId, args.limit, args.kind);
