@@ -174,6 +174,7 @@ export function friendlyError(e: unknown): string {
   }
   const msg = e instanceof Error ? e.message : String(e);
   if (msg.length > 160 || /HTTP request failed|rate limit|429|timed? ?out/i.test(msg)) console.error("vesta", e);
+  if (/Missing or invalid parameters|Signer had insufficient balance/i.test(msg)) return "Your account is still being set up. Tap again in a few seconds.";
   if (/insufficient funds/i.test(msg)) return "Not enough to cover that yet.";
   if (/HTTP request failed|rate limit|429|fetch failed|Failed to fetch/i.test(msg)) return "The network is busy right now. Wait a moment and try again.";
   if (/timed? ?out|TimeoutError/i.test(msg)) return "The network is slow right now. Check Activity before trying again.";

@@ -138,8 +138,14 @@ async function ensureGas(s: Unlocked) {
   const funded = await confirmTx(hash);
   // Monad checks senders against state from 3 blocks back, and a first send
   // made before then gets refused. Let the new balance settle first.
-  const until = Date.now() + 8_000;
-  while (Date.now() < until && (await publicClient.getBlockNumber().catch(() => 0n)) < funded.blockNumber + 4n) {
+  // Give it at least 4 seconds and 8 blocks; a send refused too early keeps
+  // failing for a while, so waiting up front is much faster than retrying.
+  const settled = Date.now() + 4_000;
+  const until = Date.now() + 12_000;
+  while (
+    Date.now() < until &&
+    (Date.now() < settled || (await publicClient.getBlockNumber().catch(() => 0n)) < funded.blockNumber + 8n)
+  ) {
     await new Promise((ok) => setTimeout(ok, 400));
   }
 }
@@ -176,8 +182,8 @@ async function sendWithRetry(write: () => Promise<Hex>) {
       return await write();
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      if (i >= 9 || !/Missing or invalid parameters|insufficient funds for gas|insufficient balance for transfer/i.test(msg)) throw e;
-      await new Promise((ok) => setTimeout(ok, 1000));
+      if (i >= 11 || !/Missing or invalid parameters|insufficient funds for gas|insufficient balance for transfer|Signer had insufficient balance/i.test(msg)) throw e;
+      await new Promise((ok) => setTimeout(ok, 2500));
     }
   }
 }
