@@ -1,14 +1,27 @@
+<p align="center"><img src="media/banner.png" alt="Vesta: the bank account for a household, not just a person" width="100%"></p>
+
+<p align="center">
+  <a href="https://vesta-pi-neon.vercel.app"><b>Try the live app</b></a> ·
+  <a href="media/videos/vesta-demo.mp4"><b>Demo video (1:53)</b></a> ·
+  <a href="#product-tour">Product tour</a> ·
+  <a href="docs/testing-guide.md">Testing guide</a> ·
+  <a href="SUBMISSION.md">Submission</a> ·
+  <a href="https://sourcify.dev/server/repo-ui/10143/0x1cb8182e22e7716f9dc9174f1be7591157288559">Verified contract</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/angelraph/vesta/actions/workflows/ci.yml"><img src="https://github.com/angelraph/vesta/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+</p>
+
 # Vesta
 
-**The bank account for a household, not just a person.**
-
-Shared rent, bill splits and money sent home, in one app you open with your face or fingerprint.
-
-**Try it:** https://vesta-pi-neon.vercel.app (Monad testnet, test money only) · [Testing guide](docs/testing-guide.md)
+**The bank account for a household, not just a person.** Shared rent, bill splits and money sent home, in one app you open with your face or fingerprint. Live on Monad testnet, so the money is test money.
 
 Built for the Monad Metropolis hackathon (Consumer Products & Payments).
 
-[![CI](https://github.com/angelraph/vesta/actions/workflows/ci.yml/badge.svg)](https://github.com/angelraph/vesta/actions/workflows/ci.yml)
+[![Watch the Vesta demo (1:53)](media/demo-thumbnail.png)](media/videos/vesta-demo.mp4)
+
+*Every clip is the live app on Monad testnet: two phones with real passkeys, real transactions, nothing mocked. How it was made is in [video/](video).*
 
 ## At a glance
 
@@ -21,7 +34,7 @@ Built for the Monad Metropolis hackathon (Consumer Products & Payments).
 | **Rent day** | A Chainlink CRE workflow pays the landlord or flags who's short, checked live with `--broadcast` |
 | **History** | Envio HyperIndex household ledger, hosted |
 | **Steward** | An AI agent with read-only tools over the house; it suggests, the passkey decides |
-| **Contract** | `HouseVault`, [verified on Sourcify](https://sourcify.dev/server/repo-ui/10143/0x1cb8182e22e7716f9dc9174f1be7591157288559) |
+| **Contracts** | `HouseVault` and `GasTap`, both [verified on Sourcify](https://sourcify.dev/server/repo-ui/10143/0x1cb8182e22e7716f9dc9174f1be7591157288559) |
 | **Tests** | 11 contract tests, plus CI on every push: contract tests, app types and lint, workflow types |
 | **Tested by people** | Real testers from our community, on their own phones ([testing guide](docs/testing-guide.md)) |
 
@@ -45,6 +58,28 @@ That's three apps, a spreadsheet in her head and a lot of awkward conversations.
 | Money home costs a fee and takes days | Money home arrives **in seconds with no fee**, settled instantly through Agora. |
 | Passwords, seed phrases, wallet apps | **One passkey.** Your phone is the account. Lose it, and your passkey brings everything back. |
 | Nobody keeps the books | A **steward** (an AI agent) answers "who still owes rent?" and hands you a button to fix it. |
+
+## Product tour
+
+Every screen below is a real screenshot of the live app on Monad testnet, taken by a script that signs up three housemates with passkeys and runs the whole flow ([video/screens.py](video/screens.py)).
+
+![Sign up with a passkey](media/tour-onboarding.png)
+
+![The rent pot](media/tour-rent.png)
+
+![Splits](media/tour-split.png)
+
+![Money home](media/tour-send.png)
+
+![The steward](media/tour-steward.png)
+
+## Videos
+
+| Video | Length | What it shows |
+|---|---|---|
+| [Demo](media/videos/vesta-demo.mp4) | 1:53 | The whole product on two phones: sign-up, house, rent, splits, money home, steward, and the passkey restore |
+| [Agora](media/videos/vesta-agora.mp4) | 1:30 | Passkey onboarding, AUSD balance, a send settled instantly through Agora, the onchain proof and the receipt |
+| [Chainlink CRE](media/videos/vesta-cre.mp4) | 1:42 | The rent-day workflow's code, two real `--broadcast` runs, and the shortfall and payout onchain |
 
 ## How it fits together
 
@@ -92,6 +127,9 @@ Diaspora housemates in the UK who share rent and send money home to Nigeria, Gha
 | `cre` | Chainlink CRE rent-day workflow. Reads every house, checks the FX rate, pays the landlord or flags who is short. |
 | `indexer` | Envio HyperIndex. Indexes HouseVault into a household ledger (feed, balances, rent cycles). |
 | `docs` | Testing guide for new users. |
+| `media` | README images built from real screenshots, and the three videos. |
+| `video` | The scripts that recorded and edited the videos and took the screenshots. |
+| `brand` | The Vesta mark as SVG, the original logo and app icons. |
 
 ## Built with
 
@@ -130,6 +168,7 @@ cre workflow simulate rent-day --target staging-settings
 | | Address |
 |---|---|
 | HouseVault (verified) | [`0x1cb8182e22e7716f9dc9174f1be7591157288559`](https://sourcify.dev/server/repo-ui/10143/0x1cb8182e22e7716f9dc9174f1be7591157288559) |
+| GasTap (verified) | [`0x48fc665129ac0007f2c8d6d9ac9784f8650841cd`](https://sourcify.dev/server/repo-ui/10143/0x48fc665129ac0007f2c8d6d9ac9784f8650841cd) |
 | AUSD | `0xa9012a055bd4e0eDfF8Ce09f960291C09D5322dC` |
 | Agora AUSD/CTK pair | `0x1Aa8958Aa34cEC8096EF4381cb335effe977b0ae` |
 | Envio GraphQL | https://indexer.dev.hyperindex.xyz/e32f57e/v1/graphql |
