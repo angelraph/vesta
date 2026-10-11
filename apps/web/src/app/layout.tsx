@@ -6,9 +6,14 @@ import "./globals.css";
 const display = Fraunces({ variable: "--font-display", subsets: ["latin"], weight: ["500", "600", "700"] });
 const body = Plus_Jakarta_Sans({ variable: "--font-body", subsets: ["latin"], weight: ["400", "500", "600", "700", "800"] });
 
+const description = "The household account. Shared rent, splits and money home, opened with one passkey.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://vesta-pi-neon.vercel.app"),
   title: "Vesta",
-  description: "The household account. Shared rent, splits and money home, opened with one passkey.",
+  description,
+  openGraph: { type: "website", siteName: "Vesta", title: "Vesta: money for the people you live with", description },
+  twitter: { card: "summary_large_image", title: "Vesta: money for the people you live with", description },
   applicationName: "Vesta",
   appleWebApp: { capable: true, title: "Vesta", statusBarStyle: "default" },
   icons: { icon: "/icon.svg", apple: "/apple-icon.png" },
