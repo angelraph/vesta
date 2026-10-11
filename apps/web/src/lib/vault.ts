@@ -241,10 +241,20 @@ export function inviteLink(houseId: bigint, secret: Hex, houseKey: Uint8Array) {
   return `${window.location.origin}/join#${houseId}.${toB64Url(toBytes(secret))}.${toB64Url(houseKey)}`;
 }
 
+/** Null when the link has no invite in it, "cut" when part of it went missing on the way. */
 export function parseInvite(fragment: string) {
-  const [id, secret, key] = fragment.replace(/^#/, "").split(".");
-  if (!id || !secret || !key) return null;
-  return { houseId: BigInt(id), secret: toHex(fromB64Url(secret)), houseKey: fromB64Url(key) };
+  const raw = fragment.replace(/^#/, "").trim();
+  if (!raw) return null;
+  const [id, secret, key] = raw.split(".");
+  try {
+    if (!/^\d+$/.test(id ?? "") || !secret || !key) return "cut" as const;
+    const s = fromB64Url(secret);
+    const k = fromB64Url(key);
+    if (s.length !== 32 || k.length !== 32) return "cut" as const;
+    return { houseId: BigInt(id), secret: toHex(s), houseKey: k };
+  } catch {
+    return "cut" as const;
+  }
 }
 
 export async function joinHouse(s: Unlocked, invite: { houseId: bigint; secret: Hex; houseKey: Uint8Array }) {

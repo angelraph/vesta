@@ -20,24 +20,26 @@ export default function Join() {
   const mounted = useMounted();
   // The invite lives after the #, so it never reaches a server.
   const hash = useSyncExternalStore(subscribeHash, () => window.location.hash, () => "");
-  const invite = useMemo(() => parseInvite(hash), [hash]);
+  const parsed = useMemo(() => parseInvite(hash), [hash]);
+  const invite = parsed && parsed !== "cut" ? parsed : null;
   const [house, setHouse] = useState<House | null>(null);
   const [people, setPeople] = useState<string[]>([]);
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<"gone" | "offline" | null>(null);
+  const [attempt, setAttempt] = useState(0);
   const [name, setNameInput] = useState("");
   const { busy, error, run } = useAction();
-  const bad = failed || (mounted && !invite && !house);
+  const problem = house ? null : failed ?? (!mounted ? null : parsed === "cut" ? "cut" : !parsed ? "missing" : null);
 
   useEffect(() => {
     if (!invite) return;
     Promise.all([getHouse(invite.houseId), getMembers(invite.houseId)])
       .then(([h, m]) => {
-        if (h.creator === "0x0000000000000000000000000000000000000000") throw new Error("no house");
+        if (h.creator === "0x0000000000000000000000000000000000000000") return setFailed("gone");
         setHouse(h);
         setPeople(m.members.map((x) => x.name));
       })
-      .catch(() => setFailed(true));
-  }, [invite]);
+      .catch(() => setFailed("offline"));
+  }, [invite, attempt]);
 
   async function finish(s: Unlocked) {
     if (!invite) return;
@@ -71,12 +73,26 @@ export default function Join() {
       await finish(s);
     });
 
-  if (bad) {
+  if (problem) {
+    const copy = {
+      missing: ["This link has no invite in it", "Ask your housemate to tap Invite a housemate on their House tab and send you that link."],
+      cut: ["Part of this link is missing", "It got cut off on the way. Ask your housemate to send it again, then tap the whole link."],
+      gone: ["We can't find this house", "Ask your housemate to send a fresh link from their House tab."],
+      offline: ["We couldn't open your invite", "Your connection or the network hiccuped. Your link is fine, so try again."],
+    }[problem];
     return (
       <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center px-6">
         <Mark size={52} />
-        <h1 className="mt-6 text-[28px] font-extrabold tracking-tight">This invite doesn&apos;t work</h1>
-        <p className="mt-2 text-ink-2">Ask your housemate to send the link again from the House tab.</p>
+        <h1 className="mt-6 text-[28px] font-extrabold tracking-tight">{copy[0]}</h1>
+        <p className="mt-2 text-ink-2">{copy[1]}</p>
+        {problem === "offline" ? (
+          <Button className="mt-8 w-full" onClick={() => {
+              setFailed(null);
+              setAttempt((n) => n + 1);
+            }}>
+            Try again
+          </Button>
+        ) : null}
       </main>
     );
   }
@@ -96,7 +112,7 @@ export default function Join() {
                 </span>
               ))}
             </div>
-            <p className="text-[14px] text-ink-2">{people.join(", ")} already live here</p>
+            <p className="text-[14px] text-ink-2">{people.join(", ")} already {people.length === 1 ? "lives" : "live"} here</p>
           </div>
         ) : null}
 
