@@ -53,7 +53,13 @@ The blockchain stays invisible: dollars and names on every screen, network fees 
 
 **Distribution, the next 100 users.** Houses grow by invitation: one person sets up a house and every housemate joins through a private link, so each sign-up brings two or three more. We start where the users already gather: diaspora student societies and shared-housing WhatsApp groups in London, Manchester and Birmingham, then the recipients themselves, since every money-home receipt carries a "Get Vesta" link.
 
-**User testing.** _Fill in: number of testers who completed the flow, and 2 or 3 quotes._ Feedback so far: "Smooth and fast at the same time" (Ken). Testers found that the steward mentioned a button it hadn't made and that early accounts showed an address instead of a name; both are fixed.
+**User testing.** Real testers, real testnet transactions, numbers from the Envio indexer (12 Oct): 8 people live in one test house, 7 of them joined through the invite link, all 8 paid their rent share, 3 shared costs were split, and 7 sends home were made by 6 different people. A second tester set up a house of her own.
+
+- "The app is nice... Very fast.. Sign in / log-in is sharp, sharp, and smooth.. Paid my rent, all is dope so far"
+- "Smooth and fast at the same time" (Ken)
+- "App looks solid, man. Good job" (MrNetwork)
+
+What testing changed: broken invite links now explain what went wrong; a sign-up fee top-up that could fail under load now retries; the copy now says any phone lock works (a tester with only a pattern lock thought she couldn't sign up); and a recipient asking how to withdraw led to the Cash out screen. Earlier: the steward mentioned a button it hadn't made, and early accounts showed an address instead of a name; both fixed.
 
 ## Agora: how a user sends AUSD across borders
 
