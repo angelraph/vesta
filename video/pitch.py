@@ -75,13 +75,13 @@ def product():
         for i, (n, l) in enumerate(phones)
     )
     return page(LIGHT, """
-.k { left:120px; top:90px; } .h { left:120px; top:140px; font-size:70px; width:700px; }
+.k { left:120px; top:90px; } .h { left:120px; top:140px; font-size:66px; width:600px; }
 .sub { position:absolute; left:120px; top:470px; width:640px; font-size:38px; line-height:1.4; color:#5b6661; animation: fade-up 800ms 400ms both cubic-bezier(.2,.8,.2,1); }
 .row { position:absolute; right:90px; top:70px; display:flex; gap:34px; }
 .p { width:330px; animation: pop 800ms both cubic-bezier(.2,.8,.2,1); text-align:center; }
 .p img { width:330px; border-radius:44px; box-shadow:0 30px 60px -20px rgba(15,31,26,.35), 0 0 0 8px #0f1f1a; }
 .l { margin-top:26px; font-size:30px; font-weight:700; }
-""", f"""<div class="k">Vesta</div><div class="h">The bank account for a household.</div>
+""", f"""<div class="k">Vesta</div><div class="h">The bank account<br>for a household.</div>
 <div class="sub">Rent, splits and money home in one shared account. Sponsored fees, dollars and names on every screen.</div><div class="row">{ph}</div>""")
 
 
