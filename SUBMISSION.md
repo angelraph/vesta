@@ -2,7 +2,7 @@
 
 Primary track: **Consumer Products & Payments**. Bounties: **Agora cross-border payments**, **Chainlink CRE**, **Envio**, **Mera-Powered UX**, **Mera: One Passkey, Many Keys**.
 
-Submission closes **14 Oct 2026, 04:59 (Lagos time)**. Submit on the 13th.
+Submission closes **14 Oct 2026, 04:59 (Lagos time)**. Submitted on 12 Oct 2026; the entry shows "Ready for judging" and can still be edited until the deadline.
 
 ## Fields
 
@@ -13,10 +13,10 @@ Submission closes **14 Oct 2026, 04:59 (Lagos time)**. Submit on the 13th.
 | Logo | `brand/vesta-logo-original.png` (or `brand/vesta-icon-512.png` for a square icon) |
 | Repository | https://github.com/angelraph/vesta (public, or share with metropolis@hackathon.monad.xyz) |
 | Live product | https://vesta-pi-neon.vercel.app |
-| Technical demo video (3 min max) | _paste YouTube link for `vesta-demo.mp4`_ |
-| Pitch video (2 min max) | _paste YouTube link_ |
-| Agora demo (2 min max) | _paste YouTube link for `vesta-agora.mp4`_ |
-| Chainlink CRE demo (2 min max) | _paste YouTube link for `vesta-cre.mp4`_ |
+| Technical demo video (3 min max) | https://youtu.be/eiCX7MlDyeM |
+| Pitch video (2 min max) | https://youtu.be/Iok-Ll3hu8U |
+| Agora demo (2 min max) | https://youtu.be/5FVoWxUVAwE |
+| Chainlink CRE demo (2 min max) | https://youtu.be/zCBrN_YgxQ4 |
 | Product ad (30 s, optional) | _optional_ |
 
 ### Access instructions for judges
