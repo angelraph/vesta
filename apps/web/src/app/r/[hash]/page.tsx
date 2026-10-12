@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { createPublicClient, decodeEventLog, http, isHash, hexToString } from "viem";
+import { createPublicClient, decodeEventLog, isHash, hexToString } from "viem";
+import { rpc } from "@/lib/rpc";
 import { houseVaultAbi } from "@/lib/abi/houseVault";
 import { addresses, AUSD_DECIMALS, chain, explorerTx } from "@/lib/config";
 import { Wordmark } from "@/components/Logo";
 
-const client = createPublicClient({ chain, transport: http(process.env.MONAD_RPC_URL) });
+const client = createPublicClient({ chain, transport: rpc(process.env.MONAD_RPC_URL) });
 
 const places: Record<string, { flag: string; symbol: string; name: string }> = {
   NGN: { flag: "🇳🇬", symbol: "₦", name: "Nigeria" },

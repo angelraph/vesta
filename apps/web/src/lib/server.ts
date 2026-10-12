@@ -1,9 +1,10 @@
 import "server-only";
-import { createPublicClient, createWalletClient, http } from "viem";
+import { createPublicClient, createWalletClient } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { chain } from "./config";
+import { rpc } from "./rpc";
 
-export const serverPublic = createPublicClient({ chain, transport: http(process.env.MONAD_RPC_URL) });
+export const serverPublic = createPublicClient({ chain, transport: rpc(process.env.MONAD_RPC_URL) });
 
 /**
  * The sponsor only pays network fees and hands out the one-time starter
@@ -12,7 +13,7 @@ export const serverPublic = createPublicClient({ chain, transport: http(process.
 export function sponsorWallet() {
   const key = process.env.SPONSOR_PRIVATE_KEY as `0x${string}` | undefined;
   if (!key) return null;
-  return createWalletClient({ account: privateKeyToAccount(key), chain, transport: http(process.env.MONAD_RPC_URL) });
+  return createWalletClient({ account: privateKeyToAccount(key), chain, transport: rpc(process.env.MONAD_RPC_URL) });
 }
 
 /**

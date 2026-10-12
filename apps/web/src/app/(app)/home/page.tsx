@@ -142,9 +142,10 @@ export default function Home() {
           {balances && gbp ? `≈ £${(fromUnits(balances.ausd) * gbp).toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : ""}
         </p>
         {balances && balances.received > 0 ? (
-          <p className="num mt-1 text-[14px] font-semibold text-good">
-            + ${balances.received.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} received from abroad, ready to cash out
-          </p>
+          <Link href="/cashout" className="num mt-2 inline-flex items-center gap-1 rounded-full bg-good/10 px-3 py-1.5 text-[14px] font-semibold text-good">
+            + ${balances.received.toLocaleString("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} received from abroad · Cash out
+            <ChevronRight size={15} />
+          </Link>
         ) : null}
       </section>
 

@@ -4,7 +4,6 @@ import {
   createPublicClient,
   erc20Abi,
   formatUnits,
-  http,
   keccak256,
   maxUint256,
   parseAbi,
@@ -16,12 +15,13 @@ import {
 } from "viem";
 import { houseVaultAbi } from "./abi/houseVault";
 import { addresses, AUSD_DECIMALS, chain } from "./config";
+import { rpc } from "./rpc";
 import { touch, type Unlocked } from "./account";
 import { deriveAesKey, fromB64Url, importAesKey, NS, open, randomBytes, seal, toB64Url } from "./keys";
 
 // The public Monad RPC can rate limit or drop a request now and then, so every
 // read retries a few times before giving up.
-export const publicClient = createPublicClient({ chain, transport: http(undefined, { retryCount: 4, retryDelay: 400 }), pollingInterval: 500 });
+export const publicClient = createPublicClient({ chain, transport: rpc(), pollingInterval: 500 });
 
 export class StillConfirming extends Error {
   constructor() {
@@ -310,6 +310,52 @@ export async function sendHome(s: Unlocked, to: Address, usd: string, corridor: 
       }),
     amount,
   );
+}
+
+const swapAbi = parseAbi(["function swapExactTokensForTokens(uint256,uint256,address[],address,uint256) returns (uint256[])"]);
+// Agora's testnet whitelister lets any address take the swapper role.
+const AGORA_WHITELISTER = "0x7c10F56d6f04a51376393a1C3670e966863F6BD5" as const;
+const whitelisterAbi = parseAbi(["function setApprovedSwapper(address)"]);
+
+/**
+ * Turns money received from abroad back into dollars, through the same Agora
+ * pair it arrived by. Returns the AUSD received.
+ */
+export async function convertReceived(s: Unlocked) {
+  const amount = await publicClient.readContract({ address: addresses.settlementPayout, abi: erc20Abi, functionName: "balanceOf", args: [s.address] });
+  if (amount === 0n) throw new Error("There's nothing to convert yet.");
+  const path = [addresses.settlementPayout, addresses.ausd] as const;
+  const [, quoted] = await publicClient.readContract({ address: addresses.settlementPair, abi: pairAbi, functionName: "getAmountsOut", args: [amount, [...path]] });
+  const minOut = (quoted * 995n) / 1000n;
+
+  const allowance = await publicClient.readContract({
+    address: addresses.settlementPayout,
+    abi: erc20Abi,
+    functionName: "allowance",
+    args: [s.address, addresses.settlementPair],
+  });
+  if (allowance < amount) {
+    await send(s, () =>
+      s.wallet.writeContract({ address: addresses.settlementPayout, abi: erc20Abi, functionName: "approve", args: [addresses.settlementPair, maxUint256] }),
+    );
+  }
+
+  const swap = () =>
+    publicClient.simulateContract({
+      account: s.wallet.account,
+      address: addresses.settlementPair,
+      abi: swapAbi,
+      functionName: "swapExactTokensForTokens",
+      args: [amount, minOut, [...path], s.address, BigInt(Math.floor(Date.now() / 1000) + 600)],
+    });
+  let sim = await swap().catch(() => null);
+  if (!sim) {
+    // The pair only swaps for approved addresses. Take the role once, then retry.
+    await send(s, () => s.wallet.writeContract({ address: AGORA_WHITELISTER, abi: whitelisterAbi, functionName: "setApprovedSwapper", args: [s.address] }));
+    sim = await swap();
+  }
+  const { hash } = await send(s, () => s.wallet.writeContract(sim.request));
+  return { hash, usd: Number(formatUnits(quoted, AUSD_DECIMALS)) };
 }
 
 // ------------------------------------------------------ encrypted house data

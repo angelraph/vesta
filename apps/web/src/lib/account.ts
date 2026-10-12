@@ -11,8 +11,9 @@ import {
   type Secp256k1SigningSession,
 } from "@category-labs/mera";
 import { toViemAccount } from "@category-labs/mera/viem";
-import { createWalletClient, http, type Address, type WalletClient, type Account, type Chain, type Transport } from "viem";
+import { createWalletClient, type Address, type WalletClient, type Account, type Chain, type Transport } from "viem";
 import { chain, SESSION_IDLE_MS } from "./config";
+import { rpc } from "./rpc";
 import { deriveAesKey, deriveBytes, importRoot, NS } from "./keys";
 
 // Only non-secret hints live in localStorage. Losing them changes nothing:
@@ -90,7 +91,7 @@ async function openSession(prfOutput: Uint8Array, credential: PasskeyCredentialM
   signing = createSecp256k1SigningSession({ privateKey });
   privateKey.fill(0);
   const address = getEvmAddress(signing.publicKey) as Address;
-  const wallet = createWalletClient({ account: toViemAccount(signing), chain, transport: http() });
+  const wallet = createWalletClient({ account: toViemAccount(signing), chain, transport: rpc() });
   const stewardKey = await deriveAesKey(root, NS.steward);
   const session: Unlocked = { address, wallet, root, stewardKey, credential, expiresAt: Date.now() + SESSION_IDLE_MS };
   writeHint({ credentialId: credential.credentialId, address });
