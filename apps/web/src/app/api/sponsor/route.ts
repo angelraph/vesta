@@ -1,5 +1,5 @@
 import { isAddress, parseAbi, parseEther } from "viem";
-import { allow, serverPublic, sponsorWallet } from "@/lib/server";
+import { allow, serverPublic, sponsorSend, sponsorWallet } from "@/lib/server";
 
 // Network fees for new accounts come from the GasTap contract, not straight
 // from the sponsor wallet: Monad reverts a MON transfer that takes an account
@@ -18,12 +18,17 @@ export async function POST(req: Request) {
 
   const balance = await serverPublic.getBalance({ address });
   if (balance >= FLOOR) return Response.json({ ok: true });
-  if (!allow(`gas:${address.toLowerCase()}`, 20_000)) {
+  if (!allow(`gas:${address.toLowerCase()}`, 8_000)) {
     return Response.json({ error: "Fees were just topped up. Give it a minute." }, { status: 429 });
   }
   if ((await serverPublic.getBalance({ address: GAS_TAP })) < DRIP) {
     return Response.json({ error: "Network fees are being refilled. Try again in a few minutes." }, { status: 503 });
   }
-  const hash = await wallet.writeContract({ address: GAS_TAP, abi: tapAbi, functionName: "drip", args: [address, DRIP] });
-  return Response.json({ ok: true, hash });
+  try {
+    const hash = await sponsorSend(() => wallet.writeContract({ address: GAS_TAP, abi: tapAbi, functionName: "drip", args: [address, DRIP] }));
+    return Response.json({ ok: true, hash });
+  } catch (e) {
+    console.error("sponsor drip failed", address, e);
+    return Response.json({ error: "We couldn't top up network fees right now. Try again in a minute." }, { status: 502 });
+  }
 }

@@ -1,6 +1,6 @@
 import { erc20Abi, isAddress, parseAbi, parseUnits } from "viem";
 import { addresses } from "@/lib/config";
-import { allow, serverPublic, sponsorWallet } from "@/lib/server";
+import { allow, serverPublic, sponsorSend, sponsorWallet } from "@/lib/server";
 
 // Test money from the Vesta pool, so people can try everything without buying
 // anything. Testnet only. The pool tops itself up from Agora's AUSD faucet.
@@ -37,6 +37,6 @@ export async function POST(req: Request) {
   }
   if (pool < GRANT) return Response.json({ error: "The test money pool is refilling. Try again in a minute." }, { status: 503 });
 
-  const hash = await wallet.writeContract({ address: addresses.ausd, abi: erc20Abi, functionName: "transfer", args: [address, GRANT] });
+  const hash = await sponsorSend(() => wallet.writeContract({ address: addresses.ausd, abi: erc20Abi, functionName: "transfer", args: [address, GRANT] }));
   return Response.json({ ok: true, hash });
 }
