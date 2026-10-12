@@ -128,6 +128,7 @@ export default function Join() {
               <Button variant="secondary" className="w-full" disabled={!house} onClick={onExisting}>
                 I already use Vesta
               </Button>
+              <p className="text-center text-[12.5px] text-ink-3">Your phone asks for whatever unlocks it: fingerprint, face, PIN or pattern.</p>
             </>
           ) : (
             <Button className="w-full" busy={busy} disabled={!house} onClick={onExisting}>

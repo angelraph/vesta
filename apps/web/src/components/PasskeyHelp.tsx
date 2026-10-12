@@ -20,7 +20,7 @@ export function PasskeyFinish() {
           <Check size={30} strokeWidth={3} />
         </span>
         <h2 className="mt-5 text-center text-[24px] font-extrabold tracking-tight">Passkey saved</h2>
-        <p className="mt-2 text-center text-ink-2">One more tap to unlock your new account. Your phone will ask for your face or fingerprint again.</p>
+        <p className="mt-2 text-center text-ink-2">One more tap to unlock your new account. Your phone will ask for your fingerprint, face, PIN or pattern again.</p>
         {error ? (
           <div className="mt-4">
             <Notice tone="error">{error}</Notice>

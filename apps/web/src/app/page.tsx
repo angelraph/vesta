@@ -50,7 +50,7 @@ export default function Welcome() {
         <div className="flex flex-1 flex-col items-center justify-center text-center">
           <Mark size={64} animated />
           <h1 className="mt-7 font-display text-[36px] font-semibold tracking-tight">Welcome home.</h1>
-          <p className="mt-2 text-ink-2">Unlock with your face or fingerprint.</p>
+          <p className="mt-2 text-ink-2">Unlock the way you unlock your phone.</p>
         </div>
         <div className="space-y-3">
           {error ? <Notice tone="error">{error}</Notice> : null}
@@ -87,7 +87,7 @@ export default function Welcome() {
             <Button variant="ghost" className="w-full" onClick={() => setStep("intro")}>
               Back
             </Button>
-            <p className="text-center text-[12.5px] text-ink-3">Your phone asks for Face ID or your fingerprint. That&apos;s your whole account.</p>
+            <p className="text-center text-[12.5px] text-ink-3">Your phone asks for whatever unlocks it: fingerprint, face, PIN or pattern. That&apos;s your whole account.</p>
           </div>
         </div>
       ) : (

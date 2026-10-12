@@ -352,8 +352,8 @@ function Passkey() {
         <span className="pulse-ring flex size-14 items-center justify-center rounded-full bg-lime text-hearth">
           <Fingerprint size={28} />
         </span>
-        <h2 className="mt-5 font-display text-[30px] font-semibold leading-[1.08] tracking-tight">Your face is the key.</h2>
-        <p className="mt-3 text-white/75">No password, no email, nothing to write down. Lose your phone, and your passkey brings everything back.</p>
+        <h2 className="mt-5 font-display text-[30px] font-semibold leading-[1.08] tracking-tight">Your phone lock is the key.</h2>
+        <p className="mt-3 text-white/75">Fingerprint, face, PIN or pattern: whatever unlocks your phone opens Vesta. No password, no email, nothing to write down. Lose your phone, and your passkey brings everything back.</p>
       </Reveal>
     </section>
   );

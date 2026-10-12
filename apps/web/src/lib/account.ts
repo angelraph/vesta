@@ -166,7 +166,7 @@ export function friendlyError(e: unknown): string {
       case "PRF_UNAVAILABLE":
         return "This browser can't use Vesta's passkeys. Open the link in Safari on iPhone (iOS 18+) or Chrome on Android.";
       case "PASSKEY_OPERATION_FAILED":
-        return "The passkey prompt closed before it finished. Tap the button to try again. If it keeps closing, open the link in Safari or Chrome.";
+        return "The passkey prompt closed before it finished. Tap the button to try again. If your phone has no screen lock, add a PIN or pattern in Settings first. If it keeps closing, open the link in Safari or Chrome.";
       case "SESSION_ENDED":
         return "Your session ended. Unlock again to continue.";
       default:
